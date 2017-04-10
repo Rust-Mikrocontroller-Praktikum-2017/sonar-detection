@@ -1,7 +1,8 @@
 
 
 fn get_phase_difference(data1: &[i32], data2: &[i32]) -> f32 {
-    //experimental
+    //not used
+    //in progress, not ready for use
     let velocity = 340.0;
 
     let zero1_1 = get_first_zero_point_from_pos_to_neg(data1);
@@ -28,10 +29,18 @@ fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     let freq1 = 1.0 / (zero1_2 - zero1_1) * 2.0;
     let freq2 = 1.0 / (zero2_2 - zero2_1) * 2.0;
     let freq = (freq1 + freq2) / 2.0;
-    if (zero1_1 - zero2_1) > (0.5 * velocity / freq) {
-        zero2_1 - zero1_1
+    //betragsfunktion
+    if (zero1_1 - zero2_1) < 0 {
+        let delta_zero = zero2_1 - zero1_1;
     } else {
-        zero1_1 - zero2_1
+        let delta_zero = zero1_1 - zero2_1;
+    }
+    //Wenn delta_zero größer als halbes T (Zeitintervall für eine Sinusschwingung)
+    //dann war das signal zuerst am 2. mikrophon ansonsten war es zuerst am ersten
+    if delta_zero > (0.5 * (1 / freq)) {
+        delta_zero
+    } else {
+        -1.0 * delta_zero
     }
     
 }
