@@ -130,11 +130,6 @@ fn main(hw: board::Hardware) -> ! {
             filter::fir_filter(&mut audio_buf, i);
             //Display filter signal on display(for debugging
             lcd.set_next_col( (audio_buf.data_filter[i].0) as u32 , (audio_buf.data_filter[i].1) as u32 );
-            //Debugging values
-            //assert!(audio_buf.data_raw[((i + AUDIO_BUF_LENGTH - 0) % AUDIO_BUF_LENGTH)].0 + audio_buf.data_raw[((i + AUDIO_BUF_LENGTH - 1) % AUDIO_BUF_LENGTH)].0 + 
-               //audio_buf.data_raw[((i + AUDIO_BUF_LENGTH - 2) % AUDIO_BUF_LENGTH)].0 == audio_buf.data_filter[i].0);
-            //assert!(audio_buf.data_raw[((i + AUDIO_BUF_LENGTH - 0) % AUDIO_BUF_LENGTH)].1 + audio_buf.data_raw[((i + AUDIO_BUF_LENGTH - 1) % AUDIO_BUF_LENGTH)].1 + 
-                //audio_buf.data_raw[((i + AUDIO_BUF_LENGTH - 2) % AUDIO_BUF_LENGTH)].0 == audio_buf.data_filter[i].1);
         }      
     }  
 }
