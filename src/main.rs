@@ -154,6 +154,7 @@ fn main (hw: board::Hardware) -> ! {
             audio_main_vec.delta_y = touch.y as i16 - aud_main_vec_anchor.y;
             print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, FIRST_COLOR);
 
+            //check box touch
             if (touch.y >= 20) && (touch.y <= 70) {
                 if (touch.y >= smoothing_box.start.y as u16) && (touch.y < smoothing_box.start.y as u16 + smoothing_box.length_y) {
                     smooth_strength = (touch.y - smoothing_box.start.y as u16) * smooth_multiplier;
