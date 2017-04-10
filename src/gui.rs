@@ -46,14 +46,25 @@ pub fn init_box(new_start: Point, new_length_x: u16, new_length_y: u16, new_colo
 //CALCULATORS, COMPUTES
 
 //calculating vector just by assuming a fixed angle and a fixed length
-fn calculate_vector(input_vector: &mut Vector, sinus: f32) -> &mut Vector {
+pub fn calculate_vector(input_vector: &mut Vector, sinus: f32) -> &mut Vector {
     //compute intensioned length of vector (root[x^2 + y^2])
-    let length = (Y_DIM_RES/2) - 10; //just hardcoded due to undefined behaviour of microcontroller by dealing with f32, f64
+    let length = (Y_DIM_RES/2) - 10; //just hardcoded
     //compute deltas
     input_vector.delta_y = (sinus * length as f32) as i16;
-    //let raw_delta_x = ((length.pow(2) as i16 - self.delta_y.pow(2)) as f32).sqrt();
-    //input_vector.delta_x = raw_delta_x as i16;
+    let raw_delta_x: f32 = (length.pow(2) as f32 - delta_y.pow(2) as f32).sqrt();
+    input_vector.delta_x = raw_delta_x as i16;
     return input_vector;
+}
+
+pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
+    //x
+    if (current_x as i16 >= input_box.start.x) && (current_x as i16 < input_box.start.x + input_box.length_x as i16) {
+        //y
+        if (current_y as i16 >= input_box.start.y) && (current_y as i16 < input_box.start.y + input_box.length_y as i16) {
+            return true;
+        }
+    }
+    return false;
 }
 
 ////
@@ -122,10 +133,10 @@ pub fn print_vector_reposition(vec: &mut Vector, from_x: i16, from_y: i16, lcd: 
 }
 
 //prints box
-pub fn print_box(box_input: &Box, lcd: &mut stm32f7::lcd::Lcd) {
-    for x in box_input.start.x..(box_input.start.x + box_input.length_x as i16) {
-        for y in box_input.start.y..(box_input.start.y + box_input.length_y as i16) {
-            lcd.print_point_color_at(limit(x, X_DIM_RES) as u16, limit(y, Y_DIM_RES) as u16, box_input.color);
+pub fn print_box(input_box: &Box, lcd: &mut stm32f7::lcd::Lcd) {
+    for x in input_box.start.x..(input_box.start.x + input_box.length_x as i16) {
+        for y in input_box.start.y..(input_box.start.y + input_box.length_y as i16) {
+            lcd.print_point_color_at(limit(x, X_DIM_RES) as u16, limit(y, Y_DIM_RES) as u16, input_box.color);
         }
     }
 }

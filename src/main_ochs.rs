@@ -103,6 +103,8 @@ fn main (hw: board::Hardware) -> ! {
     let mut smooth_strength: u16 = 1;
     let mut view_actual_waves: bool = false;
 
+    let mut sinus_alpha = 0; //alpha = 0
+
     loop {
         //GUI ENVIRO SETUPS AND UPDATES
         gui::print_box(&view_toogle_box, &mut lcd);
@@ -111,24 +113,34 @@ fn main (hw: board::Hardware) -> ! {
             print_box(&smoothing_box, &mut lcd);
         }
 
-        //check for touches
+        //CHECK USER INTERACTION (TOUCH)
         for touch in &touch::touches(&mut i2c_3).unwrap() {
-            
-            //remove old audio_main_vec
-            print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, BACKGROUND_COLOR);
-            //update deltas to difference between anchor and touch position and print audio_main_vec again
-            audio_main_vec.delta_x = touch.x as i16 - aud_main_vec_anchor.x;
-            audio_main_vec.delta_y = touch.y as i16 - aud_main_vec_anchor.y;
-            print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, FIRST_COLOR);
-
-            //check box touch
-            if (touch.y >= 20) && (touch.y <= 70) {
-                if (touch.y >= smoothing_box.start.y as u16) && (touch.y < smoothing_box.start.y as u16 + smoothing_box.length_y) {
-                    smooth_strength = (touch.y - smoothing_box.start.y as u16) * smooth_multiplier;
-                } else if (touch.y >= view_toogle_box.start.y as u16) && (touch.y < view_toogle_box.start.y as u16 + view_toogle_box.length_y) {
-                    view_actual_waves = true;
+            match view_actual_waves {
+                true => { //check if display should change mode again
+                    if gui::is_in_box(touch.x, touch.y, &view_toogle_box) {
+                        view_actual_waves = false;
+                    }
+                }
+                false => { //check if new smooth_strength is requested or view_toogle_box is pressed
+                    if gui::is_in_box(touch.x, touch.y, &smoothing_box) {
+                        smooth_strength = (touch.y - smoothing_box.start.y as u16) * smooth_multiplier;
+                    } else if gui::is_in_box(touch.x, touch.y, &view_toogle_box) {
+                        view_actual_waves = true;
+                        lcd.clear_screen();
+                    }
                 }
             }
         }
+
+        //DISPLAY COMPUTED AUDIO DATA
+        if !view_actual_waves { //displaying for vector mode
+            //remove old vector
+            print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::BACKGROUND_COLOR);
+            //calculate updated vector
+            audio_main_vec = gui::calculate_vector(&audio_main_vec, sinus_alpha);
+            //print updated vector
+            print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);
+        } else {} //NOTE: Displaying for waves mode is implemented directly at audio data poll section
+            
     }
 }
