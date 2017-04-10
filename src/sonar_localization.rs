@@ -29,7 +29,7 @@ fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     let freq1 = 1.0 / (zero1_2 - zero1_1) * 2.0;
     let freq2 = 1.0 / (zero2_2 - zero2_1) * 2.0;
     let freq = (freq1 + freq2) / 2.0;
-    //betragsfunktion
+    //betrag des Lauzeitunterschieds
     if (zero1_1 - zero2_1) < 0 {
         let delta_zero = zero2_1 - zero1_1;
     } else {
@@ -83,7 +83,7 @@ fn get_first_zero_point_from_pos_to_neg(data: &[i32]) -> f32{
     for current_data in data.iter() {
         if not_first {
             if (prev_data > 0) && (*current_data <= 0) {
-                let dx = 1.0 / 16000.0;
+                let dx = 1.0 / 48000.0;
                 let dy = current_data - prev_data;
                 let dt = counter as f32 * dx + (-1 * prev_data) as f32 / (dy as f32 / dx);
                 return dt;
@@ -94,7 +94,7 @@ fn get_first_zero_point_from_pos_to_neg(data: &[i32]) -> f32{
         prev_data = *current_data;
         counter += 1;
     }
-    0.0
+    -1.0
 }
 fn get_second_zero_point_from_pos_to_neg(data: &[i32]) -> f32 {
     let mut prev_data: i32 = 0;
