@@ -9,7 +9,7 @@ pub struct AudioBuffer {
     pub data_raw:  [(i32, i32); AUDIO_BUF_LENGTH], //(right,left)   
 }
 
-pub fn initAudioBuffer() ->AudioBuffer {
+pub fn initAudioBuffer() -> AudioBuffer {
     AudioBuffer{data_filter: [(0,0); AUDIO_BUF_LENGTH], data_raw: [(0,0); AUDIO_BUF_LENGTH]}
 }
 
