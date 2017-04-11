@@ -102,8 +102,6 @@ fn main (hw: board::Hardware) -> ! {
 
     //Init lcd controller,touch and sram
     let mut lcd = lcd::init(ltdc, rcc, &mut gpio);
-    i2c::init_pins_and_clocks(rcc, &mut gpio);
-    let mut i2c_3 = i2c::init(i2c_3);
     touch::check_family_id(&mut i2c_3).unwrap();
     sdram::init(rcc,fmc,&mut gpio);
     lcd.clear_screen();
@@ -175,7 +173,7 @@ fn main (hw: board::Hardware) -> ! {
                 }
                 false => { //check if new smooth_strength is requested or view_mode_toggle_box is pressed
                     if gui::is_in_box(touch.x, touch.y, &smoothing_box) {
-                        smooth_strength = (touch.y - smoothing_box.start.y as u16) * smooth_multiplier;
+                        smooth_strength = (touch.y - smoothing_box.start.y as u16) * gui::SMOOTH_MULTIPLIER;
                     } else if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
                         waves_mode_activated = true;
                         lcd.clear_screen();
