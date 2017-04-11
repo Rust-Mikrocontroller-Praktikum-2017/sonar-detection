@@ -22,10 +22,10 @@ pub fn fir_filter(audio_buf: &mut AudioBuffer, index: usize) {
     let mut sum_right : i32 = 0;
     let mut sum_left : i32 = 0;
     for j in 0..n {
-       sum_right = sum_right + (MULTIPLIER[j] * audio_buf.data_raw[((index + AUDIO_BUF_LENGTH - j) % AUDIO_BUF_LENGTH) as usize ].0 as f32) as i32;
-        sum_left =  sum_left + (MULTIPLIER[j] * audio_buf.data_raw[((index + AUDIO_BUF_LENGTH - j) % AUDIO_BUF_LENGTH) as usize ].1 as f32) as i32;
-        //sum_right = sum_right + audio_buf.data_raw[((index + AUDIO_BUF_LENGTH - j) % AUDIO_BUF_LENGTH) as usize ].0 as i32;
-        //sum_left =  sum_left +audio_buf.data_raw[((index + AUDIO_BUF_LENGTH - j) % AUDIO_BUF_LENGTH) as usize ].1 as i32;
+        //sum_right = sum_right + (MULTIPLIER[j] * audio_buf.data_raw[((index + AUDIO_BUF_LENGTH - j) % AUDIO_BUF_LENGTH) as usize ].0 as f32) as i32;
+        //sum_left =  sum_left + (MULTIPLIER[j] * audio_buf.data_raw[((index + AUDIO_BUF_LENGTH - j) % AUDIO_BUF_LENGTH) as usize ].1 as f32) as i32;
+        sum_right = sum_right + audio_buf.data_raw[((index + AUDIO_BUF_LENGTH - j) % AUDIO_BUF_LENGTH) as usize ].0 as i32;
+        sum_left =  sum_left +audio_buf.data_raw[((index + AUDIO_BUF_LENGTH - j) % AUDIO_BUF_LENGTH) as usize ].1 as i32;
     }
     audio_buf.data_filter[index] = ( (sum_right as i32), (sum_left as i32));
     

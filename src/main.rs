@@ -102,7 +102,6 @@ fn main (hw: board::Hardware) -> ! {
     let mut lcd = lcd::init(ltdc, rcc, &mut gpio);
     let mut layer1 = lcd.layer_1().unwrap();
     let mut layer2 = lcd.layer_2().unwrap();
-
     layer1.clear();
     layer2.clear();
     stm32f7::init_stdout(layer2);
@@ -110,16 +109,11 @@ fn main (hw: board::Hardware) -> ! {
     //Audio buffer
     let mut audio_buf = filter::init_audio_buffer();
 
+    //Set clock divider
     let mut acr1 = sai_2.acr1.read();
     let mut bcr1 = sai_2.bcr1.read();
-
-    //Set clock divider
     acr1.set_mcjdiv(6 as u8);
     bcr1.set_mcjdiv(6 as u8);
-    //Disable
-    //acr1.set_saiaen(false);
-    //bcr1.set_saiben(false);
-    //Appy changes
     sai_2.acr1.write(acr1);
     sai_2.bcr1.write(bcr1);
 
@@ -136,7 +130,10 @@ fn main (hw: board::Hardware) -> ! {
             //lcd.set_next_col(  (audio_buf.data_raw[i].0) as u32 , (audio_buf.data_raw[i].1) as u32 );
             filter::fir_filter(&mut audio_buf, i);
             //Display filter signal on display(for debugging
-            layer1.audio_writer().set_next_col( (audio_buf.data_filter[i].0) as u32 , (audio_buf.data_filter[i].1) as u32 );
+            //if view_actual_waves {
+                //layer1.audio_writer().set_next_col( (audio_buf.data_filter[i].0) as u32 , (audio_buf.data_filter[i].1) as u32 );
+            //}
+            
         }      
     }  
 
