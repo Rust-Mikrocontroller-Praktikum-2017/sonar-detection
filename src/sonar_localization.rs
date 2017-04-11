@@ -1,4 +1,4 @@
-
+use filter;
 
 //fn get_phase_difference(data1: &[i32], data2: &[i32]) -> f32 {
     //not used
@@ -59,15 +59,14 @@
 //    (((ds / distance).asin() / pi) * 180.0) as i8
 //}
 
-pub fn get_sound_source_direction_sin(data &[(i32, i32)]) -> f32 {
-    let data1: [i32; data.len()];
-    let data2: [i32; data.len()];
+pub fn get_sound_source_direction_sin(data: &[(i32, i32)]) -> f32 {
+    let data1: [i32; filter::AUDIO_BUF_LENGTH];
+    let data2: [i32; filter::AUDIO_BUF_LENGTH];
     for i in 0..data.len() {
         data1[i] = data[i].0;
         data2[i] = data[i].1;
     }
     // velocity = Schallgeschwindigkeit
-
     let velocity = 340.0;
     // distance = abstand der beiden Mikrofone
     let distance = 0.020;
@@ -82,7 +81,7 @@ pub fn get_sound_source_direction_sin(data &[(i32, i32)]) -> f32 {
     ds / distance
 }
 
-fn get_time_difference(data1 &[i32], data2 &[i32]) -> f32 {
+fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     let zero1_1 = get_first_zero_point_from_pos_to_neg(data1);
     let zero2_1 = get_first_zero_point_from_pos_to_neg(data2);
     let zero1_2 = get_second_zero_point_from_pos_to_neg(data1);
@@ -92,18 +91,20 @@ fn get_time_difference(data1 &[i32], data2 &[i32]) -> f32 {
     if T1 * 1.05 > T2 || T1 * 0.95 < T2 {
         return 0.0;
     }
+    let T = (T1 + T2) / 2.0;
     // ds1 = Laufzeitunterschied der beiden Signale an der ersten Nullstelle
-    let ds1 = zero2_1 - zero1_1;
+    let dt1 = zero2_1 - zero1_1;
     // ds2 = Laufzeitunterschied der beiden Signale an der zweiten Nullstelle
-    let ds2 = zero2_2 - zero1_2;
+    let dt2 = zero2_2 - zero1_2;
     //if (ds1 < ds2 * 1.05 && ds1 > ds2 * 0.95) {
-    let ds_temp = (ds1 + ds2) / 2.0;
-    if (ds > (0.5 * T)) {
-        let ds = T - ds;
+    let dt_temp = (dt1 + dt2) / 2.0;
+    let mut dt: f32;
+    if (dt > (0.5 * T)) {
+        dt = T - dt;
     } else {
-        let ds = ds_temp;
+        dt = dt_temp;
     }
-    ds
+    dt
 
 
     //}
