@@ -1,6 +1,6 @@
 
 
-fn get_phase_difference(data1: &[i32], data2: &[i32]) -> f32 {
+//fn get_phase_difference(data1: &[i32], data2: &[i32]) -> f32 {
     //not used
     //in progress, not ready for use
     //let velocity = 340.0;
@@ -19,7 +19,7 @@ fn get_phase_difference(data1: &[i32], data2: &[i32]) -> f32 {
 
     //}
     
-}
+//}
 //fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
 //    let velocity = 340.0;
 //
