@@ -3,22 +3,22 @@ use main;
 
 //STRUCTS
 #[derive(Copy, Clone)]
-struct Point {
-    x: i16,
-    y: i16,
+pub struct Point {
+    pub x: i16,
+    pub y: i16,
 }
 #[derive(Copy, Clone)]
-struct Vector {
-    delta_x: i16,
-    delta_y: i16,
-    last_anchor: Point,
+pub struct Vector {
+    pub delta_x: i16,
+    pub delta_y: i16,
+    pub last_anchor: Point,
 }
 #[derive(Copy, Clone)]
-struct Box {
-    start: Point,
-    LENGTH_x: u16,
-    LENGTH_y: u16,
-    color: u16,
+pub struct Box {
+    pub start: Point,
+    pub LENGTH_x: u16,
+    pub LENGTH_y: u16,
+    pub color: u16,
 }
 
 ////
@@ -142,7 +142,7 @@ pub fn print_vector(vec: &mut Vector, from_x: i16, from_y: i16, lcd: &mut stm32f
 }
 
 //removing a vector by drawing itself with BACKGROUND_COLOR
-pub fn remove_vector(vec: &mut Vector, lcd: &mut stm32f7::lcd::Lcd, color: u16) {
+pub fn remove_vector(vec: &mut Vector, lcd: &mut stm32f7::lcd::Lcd) {
     let from_x = vec.last_anchor.x;
     let from_y = vec.last_anchor.y;
     print_vector(vec, from_x, from_y, lcd, BACKGROUND_COLOR);
