@@ -128,7 +128,7 @@ fn main (hw: board::Hardware) -> ! {
     let threshold = 2048;
 
     //GUI stuff
-    let aud_main_vec_anchor = gui::init_point(gui::X_DIM_RES/2, gui::Y_DIM_RES/2);
+    let aud_main_vec_anchor = gui::init_point((gui::X_DIM_RES/2) as i16, (gui::Y_DIM_RES/2) as i16);
     let mut audio_main_vec = gui::init_vector(126, 0);
     let center_box = gui::init_box(gui::init_point(aud_main_vec_anchor.x - 5, aud_main_vec_anchor.y - 5), 10, 10, gui::FIRST_COLOR);
     let smoothing_box =  gui::init_box(gui::init_point(20, 5), 20, 200, gui::SECOND_COLOR);
@@ -188,7 +188,7 @@ fn main (hw: board::Hardware) -> ! {
             //remove old vector
             gui::remove_vector(&mut audio_main_vec, &mut lcd);
             //calculate updated vector
-            audio_main_vec = gui::calculate_vector(&audio_main_vec, sinus_alpha);
+            audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, sinus_alpha));
             //print updated vector
             gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);
         } else {} //NOTE: Displaying for waves mode is implemented directly at audio data poll section
