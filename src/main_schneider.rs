@@ -101,7 +101,7 @@ fn main(hw: board::Hardware) -> ! {
     lcd.clear_screen();
 
     //Audio buffer
-    let mut audio_buf = filter::initAudioBuffer();
+    let mut audio_buf = filter::init_audio_buffer();
 
     let mut acr1 = sai_2.acr1.read();
     let mut bcr1 = sai_2.bcr1.read();

@@ -2,11 +2,16 @@
 #![no_main]
 #[warn(unused_unsafe)]
 
+
+mod filter;
+
 extern crate stm32f7_discovery as stm32f7;
 // initialization routines for .data and .bss
 extern crate r0;
 //extern crate std::f32;
+
 use stm32f7::{system_clock, sdram, lcd, i2c, touch, board, embedded};
+
 
 #[no_mangle]
 pub unsafe extern "C" fn reset() -> ! {
@@ -28,6 +33,7 @@ pub unsafe extern "C" fn reset() -> ! {
     r0::init_data(data_start, data_end, data_load);
     //zeroes the .bss section 
     r0::zero_bss(bss_start, bss_end);
+    stm32f7::heap::init();
     
     unsafe {
         let scb = stm32f7::cortex_m::peripheral::scb_mut();
@@ -55,6 +61,7 @@ fn main (hw: board::Hardware) -> ! {
                             gpio_j,
                             gpio_k,
                             i2c_3,
+                            sai_2,
                             .. } = hw;
     use embedded::interfaces::gpio::{self, Gpio};
     let mut gpio = Gpio::new(gpio_a,
@@ -83,10 +90,8 @@ fn main (hw: board::Hardware) -> ! {
         r.set_gpiojen(true);
         r.set_gpioken(true);
     });
-
-    sdram::init(rcc, fmc, &mut gpio);
-    let mut lcd = lcd::init(ltdc, rcc, &mut gpio);
-    i2c::init_pins_and_clocks(rcc, &mut gpio);
+    //i2c
+    i2c::init_pins_and_clocks(rcc,&mut gpio);
     let mut i2c_3 = i2c::init(i2c_3);
     touch::check_family_id(&mut i2c_3).unwrap();
     
