@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#[inline(never)]
 #[warn(unused_unsafe)]
 
 
