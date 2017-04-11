@@ -122,7 +122,6 @@ fn main (hw: board::Hardware) -> ! {
     //Appy changes
     sai_2.acr1.write(acr1);
     sai_2.bcr1.write(bcr1);
-
     loop{
         //poll for new audio data
         for i in 0..filter::AUDIO_BUF_LENGTH {
@@ -137,6 +136,10 @@ fn main (hw: board::Hardware) -> ! {
             filter::fir_filter(&mut audio_buf, i);
             //Display filter signal on display(for debugging
             layer1.audio_writer().set_next_col( (audio_buf.data_filter[i].0) as u32 , (audio_buf.data_filter[i].1) as u32 );
+            //for i in 0..0xFFFFFF {
+            //    layer1.audio_writer().set_next_col(i,i);
+            //}
+           
         }      
     }  
 
