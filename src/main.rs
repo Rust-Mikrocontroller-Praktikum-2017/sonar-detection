@@ -133,12 +133,12 @@ fn main (hw: board::Hardware) -> ! {
     let center_box = gui::init_box(gui::init_point(aud_main_vec_anchor.x - 5, aud_main_vec_anchor.y - 5), 10, 10, gui::FIRST_COLOR);
     let smoothing_box =  gui::init_box(gui::init_point(20, 5), 20, 200, gui::SECOND_COLOR);
     let view_mode_toggle_box = gui::init_box(gui::init_point(20, 217), 50, 50, gui::THIRD_COLOR);
-    let mut smooth_strength: u16 = 1;
     let mut waves_mode_activated: bool = false;
-    let mut sinus_alpha;
+    //let mut smooth_strength: u16 = 1; //currently not in use
+    let mut sinus_alpha; //angle for vector mode
 
     loop{
-       //Poll for new audio data until the audio buffer for filterd data is full
+        //POLL FOR NEW AUDIO DATA //FILTERING
         let mut i = 0;
         while i < filter::AUDIO_BUF_LENGTH {
             //Write data from mics in data_raw puffer
@@ -150,10 +150,14 @@ fn main (hw: board::Hardware) -> ! {
             //Only filter relevant data above a threshold
             if audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].1 >= threshold {
                 filter::fir_filter(&mut audio_buf, i);
+                if waves_mode_activated { //interface to display
+                    lcd.set_next_col( (audio_buf.data_filter[i].0) as u32 , (audio_buf.data_filter[i].1) as u32 );
+                }
                 i += 1;
             }
         }
-        //Get sinus for displaying audio direction
+
+        //COMPUTE SINE OF COLLECTED AUDIO DATA FOR DISPLAYING
         sinus_alpha = sonar_localization::get_sound_source_direction_sin(&audio_buf.data_filter);
         
         //GUI ENVIRO SETUPS AND UPDATES
@@ -171,9 +175,9 @@ fn main (hw: board::Hardware) -> ! {
                         waves_mode_activated = false;
                     }
                 }
-                false => { //check if new smooth_strength is requested or view_mode_toggle_box is pressed
+                false => { //check if new smooth_strength is updated or view_mode_toggle_box is pressed
                     if gui::is_in_box(touch.x, touch.y, &smoothing_box) {
-                        smooth_strength = (touch.y - smoothing_box.start.y as u16) * gui::SMOOTH_MULTIPLIER;
+                        //smooth_strength = (touch.y - smoothing_box.start.y as u16) * gui::SMOOTH_MULTIPLIER; //not in use
                     } else if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
                         waves_mode_activated = true;
                         lcd.clear_screen();
