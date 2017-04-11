@@ -109,8 +109,8 @@ fn main (hw: board::Hardware) -> ! {
         //GUI ENVIRO SETUPS AND UPDATES
         gui::print_box(&view_toogle_box, &mut lcd);
         if !view_actual_waves {
-            print_box(&center_box, &mut lcd);
-            print_box(&smoothing_box, &mut lcd);
+            gui::print_box(&center_box, &mut lcd);
+            gui::print_box(&smoothing_box, &mut lcd);
         }
 
         //CHECK USER INTERACTION (TOUCH)
@@ -135,11 +135,11 @@ fn main (hw: board::Hardware) -> ! {
         //DISPLAY COMPUTED AUDIO DATA
         if !view_actual_waves { //displaying for vector mode
             //remove old vector
-            print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::BACKGROUND_COLOR);
+            gui::print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::BACKGROUND_COLOR);
             //calculate updated vector
             audio_main_vec = gui::calculate_vector(&audio_main_vec, sinus_alpha);
             //print updated vector
-            print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);
+            gui::print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);
         } else {} //NOTE: Displaying for waves mode is implemented directly at audio data poll section
             
     }

@@ -1,7 +1,7 @@
 [package]
-name = "led"
+name = "sonar"
 version = "0.1.0"
-authors = ["sebastian"]
+authors = ["ochs"]
 
 [dependencies]
 cortex-m = "0.1.4"
