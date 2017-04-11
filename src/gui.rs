@@ -80,7 +80,7 @@ pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
 //from_y: start y coordinate of vector 
 //color: color
 //lcd: display
-fn print_vector(vec: &mut Vector, from_x: i16, from_y: i16, lcd: &mut stm32f7::lcd::Lcd, color: u16) {
+pub fn print_vector(vec: &mut Vector, from_x: i16, from_y: i16, lcd: &mut stm32f7::lcd::Lcd, color: u16) {
     let mut sign_start_x = 0;
     let mut sign_start_y = 0;
     let mut sign_dest_x = 0;
