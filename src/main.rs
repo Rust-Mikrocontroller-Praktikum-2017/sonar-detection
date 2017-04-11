@@ -35,10 +35,10 @@ pub unsafe extern "C" fn reset() -> ! {
     r0::zero_bss(bss_start, bss_end);
     stm32f7::heap::init();
     
-    unsafe {
-        let scb = stm32f7::cortex_m::peripheral::scb_mut();
-        scb.cpacr.modify(|v| v | 0b1111 << 20);
-    }
+    //Floatingpoint-arithmetic activation
+    let scb = stm32f7::cortex_m::peripheral::scb_mut();
+    scb.cpacr.modify(|v| v | 0b1111 << 20);
+    
 
     main(board::hw());
 }
@@ -143,9 +143,9 @@ fn main (hw: board::Hardware) -> ! {
         while i < filter::AUDIO_BUF_LENGTH {
             //Write data from mics in data_raw puffer
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
-            audio_buf.data_raw[i].0 = (sai_2.bdr.read().data() as i32);
+            audio_buf.data_raw[i].0 = sai_2.bdr.read().data() as i32;
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
-            audio_buf.data_raw[i].1 = (sai_2.bdr.read().data() as i32);  
+            audio_buf.data_raw[i].1 = sai_2.bdr.read().data() as i32;  
 
             //Only filter relevant data above a threshold
             if audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].1 >= threshold {

@@ -28,7 +28,7 @@ pub const SECOND_COLOR: u16 = 0xf228;
 pub const THIRD_COLOR: u16 = 0xd681;
 pub const X_DIM_RES: u16 = 480;
 pub const Y_DIM_RES: u16 = 272;
-pub const SMOOTH_MULTIPLIER: u16 = 20;
+//pub const SMOOTH_MULTIPLIER: u16 = 20; //not in use
 
 ////
 //INITIALIZERS
