@@ -117,7 +117,7 @@ fn main(hw: board::Hardware) -> ! {
     sai_2.bcr1.write(bcr1);
 
     loop{
-        //poll for new audio data
+        //Poll for new audio data until the audio buffer for filterd data is full
         for i in 0..filter::AUDIO_BUF_LENGTH {
             //Right mic : bsr = u20;
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
@@ -130,6 +130,7 @@ fn main(hw: board::Hardware) -> ! {
             filter::fir_filter(&mut audio_buf, i);
             //Display filter signal on display(for debugging
             lcd.set_next_col( (audio_buf.data_filter[i].0) as u32 , (audio_buf.data_filter[i].1) as u32 );
-        }      
+        }  
+
     }  
 }
