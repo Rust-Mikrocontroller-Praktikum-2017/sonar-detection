@@ -5,6 +5,8 @@
 
 
 mod filter;
+mod gui;
+mod sonar_localization;
 
 extern crate stm32f7_discovery as stm32f7;
 // initialization routines for .data and .bss
