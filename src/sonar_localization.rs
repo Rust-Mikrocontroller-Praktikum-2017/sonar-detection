@@ -60,9 +60,9 @@ use filter;
 //}
 
 pub fn get_sound_source_direction_sin(data: &[(i32, i32)]) -> f32 {
-    let data1: [i32; filter::AUDIO_BUF_LENGTH];
-    let data2: [i32; filter::AUDIO_BUF_LENGTH];
-    for i in 0..data.len() {
+    let mut data1: [i32; filter::AUDIO_BUF_LENGTH] = [0; filter::AUDIO_BUF_LENGTH];
+    let mut data2: [i32; filter::AUDIO_BUF_LENGTH] = [0; filter::AUDIO_BUF_LENGTH];
+    for i in 0..filter::AUDIO_BUF_LENGTH {
         data1[i] = data[i].0;
         data2[i] = data[i].1;
     }
@@ -78,7 +78,7 @@ pub fn get_sound_source_direction_sin(data: &[(i32, i32)]) -> f32 {
     //ds = delta strecke, Abstandsunterschied der Signalquelle zu den beiden Mikrofonen
     let ds = velocity*dt;
     //gibt den sinus des Winkels zur Signalquelle zurück
-    ds / distance
+    (ds / distance) as f32
 }
 
 fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
@@ -98,9 +98,9 @@ fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     let dt2 = zero2_2 - zero1_2;
     //if (ds1 < ds2 * 1.05 && ds1 > ds2 * 0.95) {
     let dt_temp = (dt1 + dt2) / 2.0;
-    let mut dt: f32;
-    if dt > (0.5 * T) {
-        dt = T - dt;
+    let mut dt: f32 = 0.0;
+    if dt_temp > (0.5 * T) {
+        dt = T - dt_temp;
     } else {
         dt = dt_temp;
     }
