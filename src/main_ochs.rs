@@ -98,7 +98,7 @@ fn main (hw: board::Hardware) -> ! {
     let mut audio_main_vec = gui::init_vector(126, 0);
     let center_box = gui::init_box(gui::init_point(aud_main_vec_anchor.x - 5, aud_main_vec_anchor.y - 5), 10, 10, gui::FIRST_COLOR);
     let smoothing_box =  gui::init_box(gui::init_point(20, 5), 20, 200, gui::SECOND_COLOR);
-    let view_toogle_box = gui::init_box(gui::init_point(20, 217), 50, 50, gui::THIRD_COLOR);
+    let view_mode_toggle_box = gui::init_box(gui::init_point(20, 217), 50, 50, gui::THIRD_COLOR);
 
     let mut smooth_strength: u16 = 1;
     let mut waves_mode_activated: bool = false;
@@ -107,7 +107,7 @@ fn main (hw: board::Hardware) -> ! {
 
     loop {
         //GUI ENVIRO SETUPS AND UPDATES
-        gui::print_box(&view_toogle_box, &mut lcd);
+        gui::print_box(&view_mode_toggle_box, &mut lcd);
         if !waves_mode_activated {
             gui::print_box(&center_box, &mut lcd);
             gui::print_box(&smoothing_box, &mut lcd);
@@ -117,14 +117,14 @@ fn main (hw: board::Hardware) -> ! {
         for touch in &touch::touches(&mut i2c_3).unwrap() {
             match waves_mode_activated {
                 true => { //check if display should change mode again
-                    if gui::is_in_box(touch.x, touch.y, &view_toogle_box) {
+                    if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
                         waves_mode_activated = false;
                     }
                 }
-                false => { //check if new smooth_strength is requested or view_toogle_box is pressed
+                false => { //check if new smooth_strength is requested or view_mode_toggle_box is pressed
                     if gui::is_in_box(touch.x, touch.y, &smoothing_box) {
                         smooth_strength = (touch.y - smoothing_box.start.y as u16) * smooth_multiplier;
-                    } else if gui::is_in_box(touch.x, touch.y, &view_toogle_box) {
+                    } else if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
                         waves_mode_activated = true;
                         lcd.clear_screen();
                     }
@@ -135,11 +135,11 @@ fn main (hw: board::Hardware) -> ! {
         //DISPLAY COMPUTED AUDIO DATA
         if !waves_mode_activated { //displaying for vector mode
             //remove old vector
-            gui::print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::BACKGROUND_COLOR);
+            gui::remove_vector(&mut audio_main_vec, &mut lcd);
             //calculate updated vector
             audio_main_vec = gui::calculate_vector(&audio_main_vec, sinus_alpha);
             //print updated vector
-            gui::print_vector_reposition(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);
+            gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);
         } else {} //NOTE: Displaying for waves mode is implemented directly at audio data poll section
             
     }

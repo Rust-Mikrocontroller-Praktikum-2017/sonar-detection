@@ -80,7 +80,7 @@ pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
 //from_y: start y coordinate of vector 
 //color: color
 //lcd: display
-fn print_vector (vec: &Vector, from_x: i16, from_y: i16, color: u16, lcd: &mut stm32f7::lcd::Lcd) {
+fn print_vector(vec: &mut Vector, from_x: i16, from_y: i16, lcd: &mut stm32f7::lcd::Lcd, color: u16) {
     let mut sign_start_x = 0;
     let mut sign_start_y = 0;
     let mut sign_dest_x = 0;
@@ -124,19 +124,18 @@ fn print_vector (vec: &Vector, from_x: i16, from_y: i16, color: u16, lcd: &mut s
             current_y += sign_dest_y;
         }
     }
-}
-
-//vec: Vector
-//from_x: start x coordinate of vector
-//from_y: start y coordinate of vector 
-//lcd: Display
-pub fn print_vector_reposition(vec: &mut Vector, from_x: i16, from_y: i16, lcd: &mut stm32f7::lcd::Lcd, color: u16) {
-    print_vector(vec, from_x, from_y, color, lcd);
     vec.last_anchor.x = from_x;
     vec.last_anchor.y = from_y;
 }
 
-//prints box
+//removing a vector by drawing itself with BACKGROUND_COLOR
+pub fn remove_vector(vec: &mut Vector, lcd: &mut stm32f7::lcd::Lcd, color: u16) {
+    let from_x = vec.last_anchor.x;
+    let from_y = vec.last_anchor.y;
+    print_vector(vec, from_x, from_y, lcd, BACKGROUND_COLOR);
+}
+
+//print a box
 pub fn print_box(input_box: &Box, lcd: &mut stm32f7::lcd::Lcd) {
     for x in input_box.start.x..(input_box.start.x + input_box.length_x as i16) {
         for y in input_box.start.y..(input_box.start.y + input_box.length_y as i16) {
