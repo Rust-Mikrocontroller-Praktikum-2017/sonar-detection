@@ -117,25 +117,26 @@ fn main (hw: board::Hardware) -> ! {
     bcr1.set_mcjdiv(6 as u8);
     sai_2.acr1.write(acr1);
     sai_2.bcr1.write(bcr1);
-
+    //Thereshold for relevant data
+    let threshold = 2048;
     loop{
-        //poll for new audio data
-        for i in 0..filter::AUDIO_BUF_LENGTH {
-            //Right mic : bsr = u20;
+       //Poll for new audio data until the audio buffer for filterd data is full
+        let mut i = 0;
+        while i < filter::AUDIO_BUF_LENGTH {
+            //Write data from mics in data_raw puffer
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
             audio_buf.data_raw[i].0 = (sai_2.bdr.read().data() as i32);
-            //Left mic : asr = u21
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
             audio_buf.data_raw[i].1 = (sai_2.bdr.read().data() as i32);  
 
-            //lcd.set_next_col(  (audio_buf.data_raw[i].0) as u32 , (audio_buf.data_raw[i].1) as u32 );
-            filter::fir_filter(&mut audio_buf, i);
-            //Display filter signal on display(for debugging
-            //if view_actual_waves {
-                //layer1.audio_writer().set_next_col( (audio_buf.data_filter[i].0) as u32 , (audio_buf.data_filter[i].1) as u32 );
-            //}
-            
-        }      
+            //Only filter relevant data above a threshold
+            if audio_buf.data_raw >= threshold || audio_buf.data_raw[i].1 >= threshold {
+                filter::fir_filter(&mut audio_buf, i);
+                i += 1;
+            }
+        }
+        //Get sinus for displaying audio direction
+        let mut sin_a = sonar_localization::get_sound_source_direction_sin(&audio_buf.data_filter);
     }  
 
 }
