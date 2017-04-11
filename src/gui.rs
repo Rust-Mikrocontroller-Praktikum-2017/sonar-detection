@@ -42,6 +42,10 @@ pub fn init_box(new_start: Point, new_length_x: u16, new_length_y: u16, new_colo
     return Box{start: new_start, length_x: new_length_x, length_y: new_length_y, color: color};
 }
 
+pub fn refresh_display(waves_mode_activated: bool, lcd: &mut stm32f7::lcd::Lcd) {
+
+}
+
 ////
 //CALCULATORS, COMPUTES
 
