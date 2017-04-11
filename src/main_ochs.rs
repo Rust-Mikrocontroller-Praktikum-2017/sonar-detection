@@ -6,7 +6,9 @@ extern crate stm32f7_discovery as stm32f7;
 // initialization routines for .data and .bss
 extern crate r0;
 //extern crate std::f32;
+
 use stm32f7::{system_clock, sdram, lcd, i2c, touch, board, embedded};
+
 
 #[no_mangle]
 pub unsafe extern "C" fn reset() -> ! {
@@ -132,6 +134,7 @@ fn main (hw: board::Hardware) -> ! {
             }
         }
 
+
         //DISPLAY COMPUTED AUDIO DATA
         if !waves_mode_activated { //displaying for vector mode
             //remove old vector
@@ -141,6 +144,6 @@ fn main (hw: board::Hardware) -> ! {
             //print updated vector
             gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);
         } else {} //NOTE: Displaying for waves mode is implemented directly at audio data poll section
-            
+
     }
 }
