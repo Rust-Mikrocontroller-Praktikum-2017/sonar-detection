@@ -86,21 +86,21 @@ fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     let zero2_1 = get_first_zero_point_from_pos_to_neg(data2);
     let zero1_2 = get_second_zero_point_from_pos_to_neg(data1);
     let zero2_2 = get_second_zero_point_from_pos_to_neg(data2);
-    let T1 = zero1_2 - zero1_1;
-    let T2 = zero2_2 - zero2_1;
-    if T1 * 1.05 > T2 || T1 * 0.95 < T2 {
+    let t1 = zero1_2 - zero1_1;
+    let t2 = zero2_2 - zero2_1;
+    if t1 * 1.05 > t2 || t1 * 0.95 < t2 {
         return 0.0;
     }
-    let T = (T1 + T2) / 2.0;
+    let t = (t1 + t2) / 2.0;
     // ds1 = Laufzeitunterschied der beiden Signale an der ersten Nullstelle
     let dt1 = zero2_1 - zero1_1;
     // ds2 = Laufzeitunterschied der beiden Signale an der zweiten Nullstelle
     let dt2 = zero2_2 - zero1_2;
     //if (ds1 < ds2 * 1.05 && ds1 > ds2 * 0.95) {
     let dt_temp = (dt1 + dt2) / 2.0;
-    let mut dt: f32 = 0.0;
-    if dt_temp > (0.5 * T) {
-        dt = T - dt_temp;
+    let dt: f32;
+    if dt_temp > (0.5 * t) {
+        dt = t - dt_temp;
     } else {
         dt = dt_temp;
     }
@@ -144,7 +144,7 @@ fn get_second_zero_point_from_pos_to_neg(data: &[i32]) -> f32 {
     for current_data in data.iter() {
         if not_first {
             if (prev_data > 0) && (*current_data <= 0) {
-                if (!first_zero) {
+                if !first_zero {
                     let dx = 1.0 / 16000.0;
                     let dy = current_data - prev_data;
                     let dt = counter as f32 * dx + (-1 * prev_data) as f32 / (dy as f32 / dx);
