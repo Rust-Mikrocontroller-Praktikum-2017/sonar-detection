@@ -16,8 +16,8 @@ struct Vector {
 #[derive(Copy, Clone)]
 struct Box {
     start: Point,
-    length_x: u16,
-    length_y: u16,
+    LENGTH_x: u16,
+    LENGTH_y: u16,
     color: u16,
 }
 
@@ -39,33 +39,49 @@ pub fn init_point(new_x: i16, new_y: i16) -> Point {
 pub fn init_vector(new_delta_x: i16, new_delta_y: i16) -> Vector {
     return Vector{delta_x: new_delta_x, delta_y: new_delta_y, last_anchor: Point{x: 0, y: 0}};
 }
-pub fn init_box(new_start: Point, new_length_x: u16, new_length_y: u16, new_color: u16) -> Box {
-    return Box{start: new_start, length_x: new_length_x, length_y: new_length_y, color: new_color};
+pub fn init_box(new_start: Point, new_LENGTH_x: u16, new_LENGTH_y: u16, new_color: u16) -> Box {
+    return Box{start: new_start, LENGTH_x: new_LENGTH_x, LENGTH_y: new_LENGTH_y, color: new_color};
 }
 
 ////
 //CALCULATORS, COMPUTES
 
-//calculating vector just by assuming a fixed angle and a fixed length
+//calculating vector just by assuming a fixed angle and a fixed LENGTH
 pub fn calculate_vector(input_vector: &mut Vector, sinus: f32) -> &mut Vector {
-    //compute intensioned length of vector (root[x^2 + y^2])
-    let length = (Y_DIM_RES/2) - 10; //just hardcoded
+    //compute intensioned LENGTH of vector (root[x^2 + y^2])
+    let LENGTH = (Y_DIM_RES/2) - 10; //just hardcoded
     //compute deltas
-    input_vector.delta_y = (sinus * length as f32) as i16;
-    let raw_delta_x: f32 = (length.pow(2) as f32 - input_vector.delta_y.pow(2) as f32).sqrt();
+    input_vector.delta_y = (sinus * LENGTH as f32) as i16;
+    let raw_delta_x = sqrt(LENGTH.pow(2) as i16 - input_vector.delta_y.pow(2));
     input_vector.delta_x = raw_delta_x as i16;
     return input_vector;
 }
 
 pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
     //x
-    if (current_x as i16 >= input_box.start.x) && ((current_x as i16) < (input_box.start.x + input_box.length_x as i16)) {
+    if (current_x as i16 >= input_box.start.x) && ((current_x as i16) < (input_box.start.x + input_box.LENGTH_x as i16)) {
         //y
-        if (current_y as i16 >= input_box.start.y) && ((current_y as i16) < (input_box.start.y + input_box.length_y as i16)) {
+        if (current_y as i16 >= input_box.start.y) && ((current_y as i16) < (input_box.start.y + input_box.LENGTH_y as i16)) {
             return true;
         }
     }
     return false;
+}
+
+fn sqrt(a: i16) -> i16 {
+    if a <= 0 {
+        return 0;
+    }
+    let big_a: u64 = (a as u64) << 10;
+    let mut current_root_approx: u64 = (big_a as u64 + (1 << 10)) >> 1;
+    for _ in 0..4 {
+        current_root_approx = (current_root_approx + ((big_a / current_root_approx) << 10)) >> 1;
+    }
+    current_root_approx >>= 9;
+    if (current_root_approx & 0x1) == 1 {
+        current_root_approx += 2;
+    }
+    return (current_root_approx >> 1) as i16;
 }
 
 ////
@@ -134,8 +150,8 @@ pub fn remove_vector(vec: &mut Vector, lcd: &mut stm32f7::lcd::Lcd, color: u16) 
 
 //print a box
 pub fn print_box(input_box: &Box, lcd: &mut stm32f7::lcd::Lcd) {
-    for x in input_box.start.x..(input_box.start.x + input_box.length_x as i16) {
-        for y in input_box.start.y..(input_box.start.y + input_box.length_y as i16) {
+    for x in input_box.start.x..(input_box.start.x + input_box.LENGTH_x as i16) {
+        for y in input_box.start.y..(input_box.start.y + input_box.LENGTH_y as i16) {
             lcd.print_point_color_at(limit(x, X_DIM_RES) as u16, limit(y, Y_DIM_RES) as u16, input_box.color);
         }
     }
