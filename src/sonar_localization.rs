@@ -45,19 +45,19 @@
 //    }
 //    
 //}
-pub fn get_sound_source_direction_degree(data1: &[i32], data2: &[i32]) -> i8 {
-    let pi = 3.14159265358979323846264338327950288;
+//pub fn get_sound_source_direction_degree(data1: &[i32], data2: &[i32]) -> i8 {
+//    let pi = 3.14159265358979323846264338327950288;
     // velocity = Schallgeschwindigkeit
-    let velocity = 340.0;
+//    let velocity = 340.0;
     // distance = abstand der beiden Mikrofone
-    let distance = 0.020;
+//    let distance = 0.020;
     //dt = delta time, Laufzeitunterschied des Signals
-    let dt = get_time_difference(data1, data2);
+//    let dt = get_time_difference(data1, data2);
     //ds = delta strecke, Abstandunterschied der Signalquelle zu den beiden Mikrofonen
-    let ds = velocity*dt;
+//    let ds = velocity*dt;
     //gibt den Winkel zur Signalquelle zurück
-    (((ds / distance).asin() / pi) * 180.0) as i8
-}
+//    (((ds / distance).asin() / pi) * 180.0) as i8
+//}
 
 pub fn get_sound_source_direction_sin(data &[(i32, i32)]) -> f32 {
     let data1: [i32; data.len()];
@@ -72,7 +72,7 @@ pub fn get_sound_source_direction_sin(data &[(i32, i32)]) -> f32 {
     // distance = abstand der beiden Mikrofone
     let distance = 0.020;
     //dt = delta time, Laufzeitunterschied des Signals
-    let dt = get_time_difference(data1, data2);
+    let dt = get_time_difference(&data1, &data2);
     if dt == 0.0 {
         return 0.0;
     }
