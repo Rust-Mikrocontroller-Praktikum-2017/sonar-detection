@@ -62,9 +62,9 @@ pub fn calculate_vector(input_vector: &mut Vector, sinus: f32) -> &mut Vector {
 
 pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
     //x
-    if (current_x as i16 >= input_box.start.x) && (current_x as i16 < input_box.start.x + input_box.length_x as i16) {
+    if (current_x as i16 >= input_box.start.x) && (current_x as i16 < (input_box.start.x + input_box.length_x as i16)) {
         //y
-        if (current_y as i16 >= input_box.start.y) && (current_y as i16 < input_box.start.y + input_box.length_y as i16) {
+        if (current_y as i16 >= input_box.start.y) && (current_y as i16 < (input_box.start.y + input_box.length_y as i16)) {
             return true;
         }
     }
