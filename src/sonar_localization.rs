@@ -99,7 +99,7 @@ fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     //if (ds1 < ds2 * 1.05 && ds1 > ds2 * 0.95) {
     let dt_temp = (dt1 + dt2) / 2.0;
     let mut dt: f32;
-    if (dt > (0.5 * T)) {
+    if dt > (0.5 * T) {
         dt = T - dt;
     } else {
         dt = dt_temp;
