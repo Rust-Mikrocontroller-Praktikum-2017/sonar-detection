@@ -132,9 +132,7 @@ fn main (hw: board::Hardware) -> ! {
     sai_2.acr1.write(acr1);
     sai_2.bcr1.write(bcr1);
     //Thereshold for relevant data
-    //let threshold = 2048;
-    let threshold: i32 = 1000;
-
+    let threshold = 8000;
     //GUI stuff
     let aud_main_vec_anchor = gui::init_point((gui::X_DIM_RES/2) as i16, (gui::Y_DIM_RES/2) as i16);
     let mut audio_main_vec = gui::init_vector(126, 0);
@@ -164,25 +162,26 @@ fn main (hw: board::Hardware) -> ! {
 
     loop{
 
-
         //POLL FOR NEW AUDIO DATA //FILTERING
         let mut i = 0;
         test = false;
-        while i < filter::AUDIO_BUF_LENGTH {
+        while i < filter::AUDIO_BUF_LENGTH + filter::FILTER_OFFSET {
+
             //Write data from mics in data_raw puffer
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
             audio_buf.data_raw[i].0 = (sai_2.bdr.read().data() as i16) as i32;
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
             audio_buf.data_raw[i].1 = (sai_2.bdr.read().data() as i16) as i32;
-
-            
-
-
             //Only filter relevant data above a threshold
             if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || test {
                 test = true;
+
                 assert!(test == true);
-                filter::fir_filter(&mut audio_buf, i);
+
+                if (i >= filter::FILTER_OFFSET) {
+                     filter::fir_filter(&mut audio_buf, i);
+                }
+
                 if waves_mode_activated { //interface to display
                     lcd.set_next_col((((audio_buf.data_filter[i].0))) as u16 as u32, (((audio_buf.data_filter[i].1))) as u16 as u32);
                 }
