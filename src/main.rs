@@ -153,9 +153,6 @@ fn main (hw: board::Hardware) -> ! {
             //Only filter relevant data above a threshold
             if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || active {
                 active = true;
-
-                assert!(active == true);
-
                 if (i >= filter::FILTER_OFFSET) {
                      filter::fir_filter(&mut audio_buf, i);
                 }
