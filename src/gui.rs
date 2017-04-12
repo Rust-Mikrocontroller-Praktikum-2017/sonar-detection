@@ -29,7 +29,7 @@ pub const THIRD_COLOR: u16 = 0x07e0;
 pub const X_DIM_RES: u16 = 480;
 pub const Y_DIM_RES: u16 = 272;
 //pub const SMOOTH_MULTIPLIER: u16 = 20; //not in use
-pub const TOGGLE_COOLDOWN: usize = 1500;
+pub const COOLDOWN_TIME: usize = 1500;
 
 ////
 //INITIALIZERS
@@ -44,9 +44,9 @@ pub fn init_box(new_start: Point, new_length_x: u16, new_length_y: u16, new_colo
 }
 
 ////
-//CALCULATORS, COMPUTES
+//CALCULATORS, CHECKS, COMPUTES
 
-//calculating vector just by assuming a fixed angle and a fixed length
+//calculates a vector just by assuming a fixed angle and a fixed length
 pub fn calculate_vector(input_vector: &mut Vector, sinus: f32) -> &mut Vector {
     //compute intensioned length of vector (root[x^2 + y^2])
     let length: i16 = (Y_DIM_RES as i16 / 2) - 10; //just hardcoded
@@ -56,6 +56,7 @@ pub fn calculate_vector(input_vector: &mut Vector, sinus: f32) -> &mut Vector {
     return input_vector;
 }
 
+//checks if point (current_x, current_y) is inside input_box
 pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
     //x
     if (current_x as i16 >= input_box.start.x) && ((current_x as i16) < (input_box.start.x + input_box.length_x as i16)) {
@@ -67,7 +68,16 @@ pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
     return false;
 }
 
-pub fn sqrt(a: i16) -> i16 {
+//checks if the current tick is out of a cooldown time slice 
+pub fn is_cooled_down(usize: last_called) -> bool {
+    if (system_clock::ticks() - view_mode_last_toggle_time) > COOLDOWN_TIME {
+        return true;
+    }
+    return false;
+}
+
+//approximates the square root of a
+fn sqrt(a: i16) -> i16 {
     if a <= 0 {
         return 0;
     }
