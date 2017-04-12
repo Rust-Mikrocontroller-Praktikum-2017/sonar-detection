@@ -132,14 +132,14 @@ fn main (hw: board::Hardware) -> ! {
     sai_2.acr1.write(acr1);
     sai_2.bcr1.write(bcr1);
     //Thereshold for relevant data
-    let threshold = 8000;
+    let threshold = 400;
     //GUI stuff
     let aud_main_vec_anchor = gui::init_point((gui::X_DIM_RES/2) as i16, (gui::Y_DIM_RES/2) as i16);
     let mut audio_main_vec = gui::init_vector(126, 0);
     let center_box = gui::init_box(gui::init_point(aud_main_vec_anchor.x - 5, aud_main_vec_anchor.y - 5), 10, 10, gui::FIRST_COLOR);
     let smoothing_box =  gui::init_box(gui::init_point(20, 5), 20, 200, gui::SECOND_COLOR);
     let view_mode_toggle_box = gui::init_box(gui::init_point(20, 217), 50, 50, gui::THIRD_COLOR);
-    let mut waves_mode_activated: bool = true;
+    let mut waves_mode_activated: bool = false;
     //let mut smooth_strength: u16 = 1; //currently not in use
     let mut sinus_alpha:f32 = 0.3; //angle for vector mode
 
@@ -190,11 +190,11 @@ fn main (hw: board::Hardware) -> ! {
         }
 
 
-        if test == true {
+
             //COMPUTE SINE OF COLLECTED AUDIO DATA FOR DISPLAYING
-            sinus_alpha = 0.7;
-            //sinus_alpha = detection::get_sound_source_direction_sin(&audio_buf.data_filter);
-        }
+            //sinus_alpha = 0.7;
+            sinus_alpha = detection::get_sound_source_direction_sin(&audio_buf.data_filter);
+
         
         //GUI ENVIRO SETUPS AND UPDATES
         gui::print_box(&view_mode_toggle_box, &mut lcd);

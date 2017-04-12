@@ -60,12 +60,11 @@ use filter;
 //}
 
 pub fn get_sound_source_direction_sin(data: &[(i32, i32)]) -> f32 {
-    return -8.0;
     let mut data1: [i32; filter::AUDIO_BUF_LENGTH] = [0; filter::AUDIO_BUF_LENGTH];
     let mut data2: [i32; filter::AUDIO_BUF_LENGTH] = [0; filter::AUDIO_BUF_LENGTH];
     for i in 0..filter::AUDIO_BUF_LENGTH {
-        data1[i] = data[i].0;
-        data2[i] = data[i].1;
+        data2[i] = data[i].0;
+        data1[i] = data[i].1;
     }
     // velocity = Schallgeschwindigkeit
     let velocity = 340.0;
@@ -75,16 +74,15 @@ pub fn get_sound_source_direction_sin(data: &[(i32, i32)]) -> f32 {
     let dt = get_time_difference(&data1, &data2);
     //println!("{}",dt);
     if dt == 0.0 {
-        return -8.0;
+        return 0.0
     }
     //ds = delta strecke, Abstandsunterschied der Signalquelle zu den beiden Mikrofonen
     let ds = velocity*dt;
     //gibt den sinus des Winkels zur Signalquelle zurück
-    //(ds / distance) as f32
+    (ds / distance) as f32
 
-    -8.0
+    
 }
-
 fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     let zero1_1 = get_first_zero_point_from_pos_to_neg(data1);
     let zero2_1 = get_first_zero_point_from_pos_to_neg(data2);
@@ -99,11 +97,11 @@ fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     //println!("{}",t1);
     //println!("{}",t2);
     if t1 * 1.05 < t2 || t1 * 0.95 > t2 {
-        return -5.0;
+        return 0.0;
     }
     let t = (t1 + t2) / 2.0;
     if (t < 0.0002) {
-        return -2.0;
+        return 0.0;
     }
     // ds1 = Laufzeitunterschied der beiden Signale an der ersten Nullstelle
     let dt1 = zero2_1 - zero1_1;
@@ -117,13 +115,8 @@ fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     //println!("{}",dt_temp);
     if dt_temp > (0.5 * t) {
         dt = t - dt_temp;
-        return -6.0;
     } else {
         dt = dt_temp;
-        return -7.0;
-    }
-    if dt == 0.0 {
-        return -8.0;
     }
     dt
 
@@ -166,7 +159,7 @@ fn get_second_zero_point_from_pos_to_neg(data: &[i32]) -> f32 {
         if not_first {
             if (prev_data > 0) && (*current_data <= 0) {
                 if !first_zero {
-                    let dx = 1.0 / 56000.0;
+                    let dx = 1.0 / 48000.0;
                     let dy = current_data - prev_data;
                     let dt = counter as f32 * dx + (-1 * prev_data) as f32 / (dy as f32 / dx);
                     return dt;
