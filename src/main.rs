@@ -157,7 +157,7 @@ fn main (hw: board::Hardware) -> ! {
                 }
 
                 if waves_mode_activated { //interface to display
-                    lcd.set_next_col((((audio_buf.data_filter[i].0 + 0x8000 ))) as u16 as u32, (((audio_buf.data_filter[i].1 + 0x8000))) as u16 as u32);
+                    lcd.set_next_col((((audio_buf.data_filter[i].0))) as u16 as u32, (((audio_buf.data_filter[i].1))) as u16 as u32);
                 }
                 i += 1;
             }
