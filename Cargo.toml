@@ -14,3 +14,4 @@ cortex-m = "0.1.4"
 
 [profile.release]
 lto = true
+debug = true

@@ -49,11 +49,10 @@ pub fn init_box(new_start: Point, new_length_x: u16, new_length_y: u16, new_colo
 //calculating vector just by assuming a fixed angle and a fixed length
 pub fn calculate_vector(input_vector: &mut Vector, sinus: f32) -> &mut Vector {
     //compute intensioned length of vector (root[x^2 + y^2])
-    let length = (Y_DIM_RES/2) - 10; //just hardcoded
+    let length: i16 = (Y_DIM_RES as i16 / 2) - 10; //just hardcoded
     //compute deltas
     input_vector.delta_y = (sinus * length as f32) as i16;
-    let raw_delta_x = sqrt(length.pow(2) as i16 - input_vector.delta_y.pow(2));
-    input_vector.delta_x = raw_delta_x as i16;
+    input_vector.delta_x = sqrt(length.pow(2) - input_vector.delta_y.pow(2));
     return input_vector;
 }
 
@@ -68,7 +67,7 @@ pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
     return false;
 }
 
-fn sqrt(a: i16) -> i16 {
+pub fn sqrt(a: i16) -> i16 {
     if a <= 0 {
         return 0;
     }
