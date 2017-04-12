@@ -141,22 +141,8 @@ fn main (hw: board::Hardware) -> ! {
     let view_mode_toggle_box = gui::init_box(gui::init_point(20, 217), 50, 50, gui::THIRD_COLOR);
     let mut waves_mode_activated: bool = false;
     //let mut smooth_strength: u16 = 1; //currently not in use
-    let mut sinus_alpha:f32 = 0.3; //angle for vector mode
-
-
-    
-
-    //let data1 = [-921809,-999984,-926073,-711317,-388378,-6371,376606,702304,921191,999974,926673,712436,389845,7963,-375130,-701170,-920570,-999962,-927271,-713553,-391311,-9556,373653,700033,919947,999946,927866,714667,392776,11148,-372175,-698895];
-    //let data2 = [-933525,-999667,-913770,-688900,-359256,25027,405503,724307,932953,999706,914416,690054,360742,-23435,-404047,-723208,-932378,-999744,-915060,-691206,-362227,21842,402590,722108,931801,999779,915701,692356,363711,-20250,-401131,-721005];
-
-    //let mut data_used:[(i32, i32); filter::AUDIO_BUF_LENGTH] = [(0,0); filter::AUDIO_BUF_LENGTH];
-
-    //for i in 0..32 {
-    //    data_used[i] = (data1[i], data2[i]);
-    //}
-
-
-    //DEBUGGING
+    let mut sinus_alpha:f32 = 0.0; //angle for vector mode
+    //specifies if sampled audio values are valid
     let mut active = false;
 
 
@@ -192,7 +178,6 @@ fn main (hw: board::Hardware) -> ! {
 
 
             //COMPUTE SINE OF COLLECTED AUDIO DATA FOR DISPLAYING
-            //sinus_alpha = 0.7;
             sinus_alpha = detection::get_sound_source_direction_sin(&audio_buf.data_filter);
 
         

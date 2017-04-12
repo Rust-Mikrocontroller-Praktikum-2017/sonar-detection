@@ -88,10 +88,9 @@ fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     let zero2_1 = get_first_zero_point_from_pos_to_neg(data2);
     let zero1_2 = get_second_zero_point_from_pos_to_neg(data1);
     let zero2_2 = get_second_zero_point_from_pos_to_neg(data2);
-    //println!("{}",zero1_1);
-    //println!("{}",zero1_2);
-    //println!("{}",zero2_1);
-    //println!("{}",zero2_2);
+    if zero1_1 == -1.0 || zero2_1 == -1.0 || zero1_2 == -1.0 || zero2_2 == -1.0 {
+        return 0.0;
+    }
     let t1 = zero1_2 - zero1_1;
     let t2 = zero2_2 - zero2_1;
     //println!("{}",t1);
@@ -109,33 +108,23 @@ fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     let dt2 = zero2_2 - zero1_2;
     //if (ds1 < ds2 * 1.05 && ds1 > ds2 * 0.95) {
     let dt_temp = (dt1 + dt2) / 2.0;
-    let mut dt: f32 = 0.0;
-    //println!("{}",dt1);
-    //println!("{}",dt2);
-    //println!("{}",dt_temp);
+    //bestimmt ob das signal von links oder von rechts kommt
     if dt_temp > (0.5 * t) {
-        dt = t - dt_temp;
+        t - dt_temp
     } else {
-        dt = dt_temp;
+        dt_temp
     }
-    dt
-
-
-    //}
-    //0.0
-
-
-
 }
 fn get_first_zero_point_from_pos_to_neg(data: &[i32]) -> f32 {
     //berechnet die erste Nullstelle des Signals
-
     let mut prev_data: i32 = 0;
     let mut not_first = false;
     let mut counter:u32 = 0;
     for current_data in data.iter() {
         if not_first {
             if (prev_data > 0) && (*current_data <= 0) {
+                //Annäherung der Nullstelle durch eine Positive und eine Negative Stelle
+                //Annäherung durch gerade durch die NullLinie
                 let dx = 1.0 / 48000.0;
                 let dy = current_data - prev_data;
                 let dt = counter as f32 * dx + (-1 * prev_data) as f32 / (dy as f32 / dx);
