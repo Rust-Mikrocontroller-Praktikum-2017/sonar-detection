@@ -69,8 +69,8 @@ pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
 }
 
 //checks if the current tick is out of a cooldown time slice 
-pub fn is_cooled_down(usize: last_called) -> bool {
-    if (system_clock::ticks() - view_mode_last_toggle_time) > COOLDOWN_TIME {
+pub fn is_cooled_down(last_called: usize) -> bool {
+    if (stm32f7::system_clock::ticks() - last_called) > COOLDOWN_TIME {
         return true;
     }
     return false;
