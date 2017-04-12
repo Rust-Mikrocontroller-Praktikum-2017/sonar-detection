@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
-#[warn(unused_unsafe)]
+#![warn(unused_unsafe)]
+#![feature(compiler_builtins_lib)]
 
 
 mod filter;
@@ -11,7 +12,8 @@ extern crate stm32f7_discovery as stm32f7;
 // initialization routines for .data and .bss
 extern crate r0;
 //extern crate std::f32;
-use stm32f7::{system_clock, sdram, lcd, i2c,audio, touch, board, embedded};
+extern crate compiler_builtins;
+use stm32f7::{system_clock, sdram, lcd, i2c, audio, touch, board, embedded};
 
 #[no_mangle]
 pub unsafe extern "C" fn reset() -> ! {
@@ -91,6 +93,10 @@ fn main (hw: board::Hardware) -> ! {
         r.set_gpiojen(true);
         r.set_gpioken(true);
     });
+
+    //sdram
+    sdram::init(rcc,fmc,&mut gpio);
+    
     //i2c
     i2c::init_pins_and_clocks(rcc,&mut gpio);
     let mut i2c_3 = i2c::init(i2c_3);
@@ -103,16 +109,9 @@ fn main (hw: board::Hardware) -> ! {
     //Init lcd controller,touch and sram
     let mut lcd = lcd::init(ltdc, rcc, &mut gpio);
     touch::check_family_id(&mut i2c_3).unwrap();
-    sdram::init(rcc,fmc,&mut gpio);
+    
     lcd.clear_screen();
     lcd.set_background_color(lcd::Color::from_hex(gui::BACKGROUND_COLOR as u32));
-    
-    //let mut lcd = lcd::init(ltdc, rcc, &mut gpio);
-    //let mut layer1 = lcd.layer_1().unwrap();
-    //let mut layer2 = lcd.layer_2().unwrap();
-    //layer1.clear();
-    //layer2.clear();
-    //stm32f7::init_stdout(layer2);
 
     //Audio buffer
     let mut audio_buf = filter::init_audio_buffer();
@@ -120,13 +119,12 @@ fn main (hw: board::Hardware) -> ! {
     //Set clock divider
     let mut acr1 = sai_2.acr1.read();
     let mut bcr1 = sai_2.bcr1.read();
-    acr1.set_mcjdiv(6 as u8);
-    bcr1.set_mcjdiv(6 as u8);
+    acr1.set_mcjdiv(2 as u8);
+    bcr1.set_mcjdiv(2 as u8);
     sai_2.acr1.write(acr1);
     sai_2.bcr1.write(bcr1);
     //Thereshold for relevant data
-    let threshold = 2048;
-
+    let threshold = 400;
     //GUI stuff
     let aud_main_vec_anchor = gui::init_point((gui::X_DIM_RES/2) as i16, (gui::Y_DIM_RES/2) as i16);
     let mut audio_main_vec = gui::init_vector(126, 0);
@@ -135,23 +133,35 @@ fn main (hw: board::Hardware) -> ! {
     let view_mode_toggle_box = gui::init_box(gui::init_point(20, 217), 50, 50, gui::THIRD_COLOR);
     let mut waves_mode_activated: bool = false;
     //let mut smooth_strength: u16 = 1; //currently not in use
-    let mut sinus_alpha; //angle for vector mode
+    let mut sinus_alpha:f32 = 0.0; //angle for vector mode
+    //specifies if sampled audio values are valid
+    let mut active = false;
+
 
     loop{
+
         //POLL FOR NEW AUDIO DATA //FILTERING
         let mut i = 0;
-        while i < filter::AUDIO_BUF_LENGTH {
+        active = false;
+        while i < filter::AUDIO_BUF_LENGTH + filter::FILTER_OFFSET {
+
             //Write data from mics in data_raw puffer
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
-            audio_buf.data_raw[i].0 = sai_2.bdr.read().data() as i32;
+            audio_buf.data_raw[i].0 = (sai_2.bdr.read().data() as i16) as i32;
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
-            audio_buf.data_raw[i].1 = sai_2.bdr.read().data() as i32;  
-
+            audio_buf.data_raw[i].1 = (sai_2.bdr.read().data() as i16) as i32;
             //Only filter relevant data above a threshold
-            if audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].1 >= threshold {
-                filter::fir_filter(&mut audio_buf, i);
+            if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || active {
+                active = true;
+
+                assert!(active == true);
+
+                if (i >= filter::FILTER_OFFSET) {
+                     filter::fir_filter(&mut audio_buf, i);
+                }
+
                 if waves_mode_activated { //interface to display
-                    lcd.set_next_col( (audio_buf.data_filter[i].0) as u32 , (audio_buf.data_filter[i].1) as u32 );
+                    lcd.set_next_col((((audio_buf.data_filter[i].0))) as u16 as u32, (((audio_buf.data_filter[i].1))) as u16 as u32);
                 }
                 i += 1;
             }
@@ -186,17 +196,17 @@ fn main (hw: board::Hardware) -> ! {
             }
         }
 
-
         //DISPLAY COMPUTED AUDIO DATA
         if !waves_mode_activated { //displaying for vector mode
             //remove old vector
             gui::remove_vector(&mut audio_main_vec, &mut lcd);
+            
             //calculate updated vector
-            audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, sinus_alpha));
+            if sinus_alpha < 1.0 && sinus_alpha > -1.0 {
+                  audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, sinus_alpha));
+            }    
             //print updated vector
-            gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);
-        } else {} //NOTE: Displaying for waves mode is implemented directly at audio data poll section
-
+            gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);            
+        } else {} //NOTE: Displaying for waves mode is implemented directly at audio data poll section  
     }  
-
 }
