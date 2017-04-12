@@ -25,7 +25,7 @@ pub struct Box {
 pub const BACKGROUND_COLOR: u16 = 0x11ac;
 pub const FIRST_COLOR: u16 = 0xffff;
 pub const SECOND_COLOR: u16 = 0xfae0;
-pub const THIRD_COLOR: u16 = 0x07e0;
+pub const THIRD_COLOR: u16 = 0xdf48;
 pub const X_DIM_RES: u16 = 480;
 pub const Y_DIM_RES: u16 = 272;
 //pub const SMOOTH_MULTIPLIER: u16 = 20; //not in use

@@ -129,14 +129,17 @@ fn main (hw: board::Hardware) -> ! {
     let aud_main_vec_anchor = gui::init_point((gui::X_DIM_RES/2) as i16, (gui::Y_DIM_RES/2) as i16);
     let mut audio_main_vec = gui::init_vector(126, 0);
     let center_box = gui::init_box(gui::init_point(aud_main_vec_anchor.x - 5, aud_main_vec_anchor.y - 5), 10, 10, gui::FIRST_COLOR);
-    let smoothing_box =  gui::init_box(gui::init_point(20, 5), 20, 200, gui::SECOND_COLOR);
-    let view_mode_toggle_box = gui::init_box(gui::init_point(20, 217), 50, 50, gui::THIRD_COLOR);
+    let smoothing_box =  gui::init_box(gui::init_point(20, 10), 20, 200, gui::SECOND_COLOR);
+    let view_mode_toggle_box = gui::init_box(gui::init_point(20, 212), 50, 50, gui::THIRD_COLOR);
     let mut waves_mode_activated: bool = false;
-    //let mut smooth_strength: u16 = 1; //currently not in use
-    let mut sinus_alpha:f32 = 0.0; //angle for vector mode
+    let mut smoothing_data_counter = 0;
+    let mut smoothing_data_sumup: f32 = 0.0;
+    let mut smoothing_data_avg: f32;
+    let mut smoothing_data_strength = 32;
+    //angle for vector mode
+    let mut sinus_alpha: f32;
     //specifies if sampled audio values are valid
     let mut active = false;
-
 
     loop{
 
@@ -177,9 +180,10 @@ fn main (hw: board::Hardware) -> ! {
         //CHECK USER INTERACTION (TOUCH)
         for touch in &touch::touches(&mut i2c_3).unwrap() {
             match waves_mode_activated {
-                true => { //check if display should change mode again
+                true => { //check if display should change mode
                     if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
                         waves_mode_activated = false;
+                        lcd.clear_screen();
                     }
                 }
                 false => { //check if new smooth_strength is updated or view_mode_toggle_box is pressed
@@ -197,10 +201,17 @@ fn main (hw: board::Hardware) -> ! {
         if !waves_mode_activated { //displaying for vector mode
             //remove old vector
             gui::remove_vector(&mut audio_main_vec, &mut lcd);
-            
             //calculate updated vector
-            if sinus_alpha < 1.0 && sinus_alpha > -1.0 {
-                  audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, sinus_alpha));
+            if sinus_alpha < 1.0 && sinus_alpha > -1.0 && sinus_alpha != 0.0 {
+                smoothing_data_sumup += sinus_alpha;
+                smoothing_data_counter += 1;
+                if smoothing_data_counter == smoothing_data_strength {
+                    smoothing_data_avg = smoothing_data_sumup / smoothing_data_strength as f32;
+                    smoothing_data_sumup = smoothing_data_avg;
+                    smoothing_data_counter = 0;
+                    audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, smoothing_data_avg));
+                }
+                
             }    
             //print updated vector
             gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);            
