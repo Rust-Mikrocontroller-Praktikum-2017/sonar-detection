@@ -123,21 +123,31 @@ fn main (hw: board::Hardware) -> ! {
     bcr1.set_mcjdiv(2 as u8);
     sai_2.acr1.write(acr1);
     sai_2.bcr1.write(bcr1);
-    //Thereshold for relevant data
+    //Threshold for relevant data
     let threshold = 400;
+    //specifies if sampled audio values are valid
+    let mut active;
+
+
     //GUI stuff
     let aud_main_vec_anchor = gui::init_point((gui::X_DIM_RES/2) as i16, (gui::Y_DIM_RES/2) as i16);
     let mut audio_main_vec = gui::init_vector(126, 0);
+    let mut sinus_alpha:f32; //angle for vector mode
+    let mut smoothing_data_counter: i16 = 0;
+    let mut smoothing_data_sumup: f32 = 0.0;
+    let mut smoothing_data_avg: f32;
+    let mut smoothing_data_strength = gui::SMOOTHING_STRENGTH_LOW;
+    
+    //NOT NEEDED, but ready to be implemented ;)
+    
+    //let smoothing_box =  gui::init_box(gui::init_point(20, 5), 20, 200, gui::SECOND_COLOR);
+    //let view_mode_toggle_box = gui::init_box(gui::init_point(20, 217), 50, 50, gui::THIRD_COLOR);
+    //let mut view_mode_last_toggled: usize = system_clock::ticks();
+    //---
+
     let center_box = gui::init_box(gui::init_point(aud_main_vec_anchor.x - 5, aud_main_vec_anchor.y - 5), 10, 10, gui::FIRST_COLOR);
-    let smoothing_box =  gui::init_box(gui::init_point(20, 5), 20, 200, gui::SECOND_COLOR);
-    let view_mode_toggle_box = gui::init_box(gui::init_point(20, 217), 50, 50, gui::THIRD_COLOR);
     let mut waves_mode_activated: bool = false;
-    //let mut smooth_strength: u16 = 1; //currently not in use
-    let mut sinus_alpha:f32 = 0.0; //angle for vector mode
-    //specifies if sampled audio values are valid
-    let mut active = false;
-
-
+    
     loop{
 
         //POLL FOR NEW AUDIO DATA //FILTERING
@@ -153,7 +163,7 @@ fn main (hw: board::Hardware) -> ! {
             //Only filter relevant data above a threshold
             if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || active {
                 active = true;
-                if (i >= filter::FILTER_OFFSET) {
+                if i >= filter::FILTER_OFFSET {
                      filter::fir_filter(&mut audio_buf, i);
                 }
 
@@ -168,41 +178,54 @@ fn main (hw: board::Hardware) -> ! {
         sinus_alpha = sonar_localization::get_sound_source_direction_sin(&audio_buf.data_filter);
         
         //GUI ENVIRO SETUPS AND UPDATES
-        gui::print_box(&view_mode_toggle_box, &mut lcd);
+        //gui::print_box(&view_mode_toggle_box, &mut lcd);
         if !waves_mode_activated {
-            gui::print_box(&center_box, &mut lcd);
-            gui::print_box(&smoothing_box, &mut lcd);
+            gui::print_box(&center_box, &mut lcd); //currently not needed
+            //gui::print_box(&smoothing_box, &mut lcd); //currently not needed
         }
 
+        //NOTE: user interaction due to unsolved problems in the stm32f7_discovery api not possible :(
+
         //CHECK USER INTERACTION (TOUCH)
-        for touch in &touch::touches(&mut i2c_3).unwrap() {
-            match waves_mode_activated {
-                true => { //check if display should change mode again
-                    if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
-                        waves_mode_activated = false;
-                    }
-                }
-                false => { //check if new smooth_strength is updated or view_mode_toggle_box is pressed
-                    if gui::is_in_box(touch.x, touch.y, &smoothing_box) {
-                        //smooth_strength = (touch.y - smoothing_box.start.y as u16) * gui::SMOOTH_MULTIPLIER; //not in use
-                    } else if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
-                        waves_mode_activated = true;
-                        lcd.clear_screen();
-                    }
-                }
-            }
-        }
+//        for touch in &touch::touches(&mut i2c_3).unwrap() {
+//            match waves_mode_activated {
+//                true => { //check if display should change mode again
+//                    if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) && gui::is_cooled_down(view_mode_last_toggled) {
+//                        waves_mode_activated = false;
+//                        lcd.clear_screen();
+//                        view_mode_last_toggled = system_clock::ticks();
+//                    }
+//                }
+//                false => { //check if new smooth_strength is updated or view_mode_toggle_box is pressed
+//                    if gui::is_in_box(touch.x, touch.y, &smoothing_box) {
+//                        //smooth_strength = (touch.y - smoothing_box.start.y as u16) * gui::SMOOTH_MULTIPLIER; //not in use
+//                    } else if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) && gui::is_cooled_down(view_mode_last_toggled) {
+//                        waves_mode_activated = true;
+//                        lcd.clear_screen();
+//                        view_mode_last_toggled = system_clock::ticks();
+//                    }
+//                }
+//            }
+//        }
+
+        //---
 
         //DISPLAY COMPUTED AUDIO DATA
         if !waves_mode_activated { //displaying for vector mode
             //remove old vector
             gui::remove_vector(&mut audio_main_vec, &mut lcd);
-            
-            //calculate updated vector
-            if sinus_alpha < 1.0 && sinus_alpha > -1.0 {
-                  audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, sinus_alpha));
+            //smooth sinus_alpha until smoothing_data_strength, then update audio_main_vec
+            if sinus_alpha < 1.0 && sinus_alpha > -1.0 && sinus_alpha != 0.0 {
+                smoothing_data_sumup += sinus_alpha;
+                smoothing_data_counter += 1;
+                if smoothing_data_counter == smoothing_data_strength { //now update audio_main_vec
+                    smoothing_data_avg = smoothing_data_sumup / smoothing_data_strength as f32;
+                    smoothing_data_sumup = smoothing_data_avg;
+                    smoothing_data_counter = 0;
+                    audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, smoothing_data_avg));
+                }
             }    
-            //print updated vector
+            //print vector
             gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);            
         } else {} //NOTE: Displaying for waves mode is implemented directly at audio data poll section  
     }  

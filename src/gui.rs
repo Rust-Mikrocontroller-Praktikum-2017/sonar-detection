@@ -28,7 +28,7 @@ pub const SECOND_COLOR: u16 = 0xfae0;
 pub const THIRD_COLOR: u16 = 0x07e0;
 pub const X_DIM_RES: u16 = 480;
 pub const Y_DIM_RES: u16 = 272;
-//pub const SMOOTH_MULTIPLIER: u16 = 20; //not in use
+pub const SMOOTHING_STRENGTH_LOW: i16 = 4; 
 pub const COOLDOWN_TIME: usize = 1500;
 
 ////
