@@ -129,13 +129,14 @@ fn main (hw: board::Hardware) -> ! {
     let aud_main_vec_anchor = gui::init_point((gui::X_DIM_RES/2) as i16, (gui::Y_DIM_RES/2) as i16);
     let mut audio_main_vec = gui::init_vector(126, 0);
     let center_box = gui::init_box(gui::init_point(aud_main_vec_anchor.x - 5, aud_main_vec_anchor.y - 5), 10, 10, gui::FIRST_COLOR);
-    let smoothing_box =  gui::init_box(gui::init_point(20, 10), 20, 200, gui::SECOND_COLOR);
-    let view_mode_toggle_box = gui::init_box(gui::init_point(20, 212), 50, 50, gui::THIRD_COLOR);
+    let smoothing_box_low =  gui::init_box(gui::init_point(30, 10), 30, 80, gui::SECOND_COLOR);
+    let smoothing_box_high = gui::init_box(gui::init_point(30, 100), 30, 80, gui::THIRD_COLOR);
+    let view_mode_toggle_box = gui::init_box(gui::init_point(20, 210), 50, 50, gui::FOURTH_COLOR);
     let mut waves_mode_activated: bool = false;
-    let mut smoothing_data_counter = 0;
+    let mut smoothing_data_counter: i16 = 0;
     let mut smoothing_data_sumup: f32 = 0.0;
-    let mut smoothing_data_avg: f32;
-    let mut smoothing_data_strength = 32;
+    let mut smoothing_data_avg: f32 = 0.0;
+    let mut smoothing_data_strength: i16 = gui::SMOOTHING_STRENGTH_LOW;
     //angle for vector mode
     let mut sinus_alpha: f32;
     //specifies if sampled audio values are valid
@@ -174,29 +175,13 @@ fn main (hw: board::Hardware) -> ! {
         gui::print_box(&view_mode_toggle_box, &mut lcd);
         if !waves_mode_activated {
             gui::print_box(&center_box, &mut lcd);
-            gui::print_box(&smoothing_box, &mut lcd);
-        }
-
-        //CHECK USER INTERACTION (TOUCH)
-        for touch in &touch::touches(&mut i2c_3).unwrap() {
-            match waves_mode_activated {
-                true => { //check if display should change mode
-                    if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
-                        waves_mode_activated = false;
-                        lcd.clear_screen();
-                    }
-                }
-                false => { //check if new smooth_strength is updated or view_mode_toggle_box is pressed
-                    if gui::is_in_box(touch.x, touch.y, &smoothing_box) {
-                        //smooth_strength = (touch.y - smoothing_box.start.y as u16) * gui::SMOOTH_MULTIPLIER; //not in use
-                    } else if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
-                        waves_mode_activated = true;
-                        lcd.clear_screen();
-                    }
-                }
+            if smoothing_data_strength == gui::SMOOTHING_STRENGTH_LOW { //possible to toggle strength to high
+                gui::print_box(&smoothing_box_high, &mut lcd);
+            } else { //possible to toggle strength to low
+                gui::print_box(&smoothing_box_low, &mut lcd);
             }
         }
-
+        
         //DISPLAY COMPUTED AUDIO DATA
         if !waves_mode_activated { //displaying for vector mode
             //remove old vector
@@ -216,5 +201,31 @@ fn main (hw: board::Hardware) -> ! {
             //print updated vector
             gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);            
         } else {} //NOTE: Displaying for waves mode is implemented directly at audio data poll section  
+        
+        //CHECK USER INTERACTION (TOUCH)
+        for touch in &touch::touches(&mut i2c_3).unwrap() {
+            match waves_mode_activated {
+                true => { //check if display should change mode
+                    if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
+                        waves_mode_activated = false;
+                        lcd.clear_screen();
+                    }
+                }
+                false => { //check if new smooth_strength is updated or view_mode_toggle_box is pressed
+                    if gui::is_in_box(touch.x, touch.y, &smoothing_box_low) {
+                        smoothing_data_strength = gui::SMOOTHING_STRENGTH_LOW;
+                        gui::remove_box(&smoothing_box_low, &mut lcd);
+                        smoothing_data_sumup = smoothing_data_avg; //reset to avoid overflow
+                    } else if gui::is_in_box(touch.x, touch.y, &smoothing_box_high) {
+                        smoothing_data_strength = gui::SMOOTHING_STRENGTH_HIGH;
+                        gui::remove_box(&smoothing_box_high, &mut lcd);
+                        smoothing_data_sumup = smoothing_data_avg;
+                    } else if gui::is_in_box(touch.x, touch.y, &view_mode_toggle_box) {
+                        waves_mode_activated = true;
+                        lcd.clear_screen();
+                    }
+                }
+            }
+        }
     }  
 }

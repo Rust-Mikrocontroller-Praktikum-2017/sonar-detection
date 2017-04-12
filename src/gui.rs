@@ -25,10 +25,12 @@ pub struct Box {
 pub const BACKGROUND_COLOR: u16 = 0x11ac;
 pub const FIRST_COLOR: u16 = 0xffff;
 pub const SECOND_COLOR: u16 = 0xfae0;
-pub const THIRD_COLOR: u16 = 0xdf48;
+pub const THIRD_COLOR: u16 = 0xfae0;
+pub const FOURTH_COLOR: u16 = 0xdf48;
 pub const X_DIM_RES: u16 = 480;
 pub const Y_DIM_RES: u16 = 272;
-//pub const SMOOTH_MULTIPLIER: u16 = 20; //not in use
+pub const SMOOTHING_STRENGTH_LOW: i16 = 4;
+pub const SMOOTHING_STRENGTH_HIGH: i16 = 24;
 pub const COOLDOWN_TIME: usize = 1500;
 
 ////
@@ -59,9 +61,9 @@ pub fn calculate_vector(input_vector: &mut Vector, sinus: f32) -> &mut Vector {
 //checks if point (current_x, current_y) is inside input_box
 pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
     //x
-    if (current_x as i16 >= input_box.start.x) && ((current_x as i16) < (input_box.start.x + input_box.length_x as i16)) {
+    if (current_x as i16 >= input_box.start.x - 5) && ((current_x as i16) < (input_box.start.x + input_box.length_x as i16) + 5) {
         //y
-        if (current_y as i16 >= input_box.start.y) && ((current_y as i16) < (input_box.start.y + input_box.length_y as i16)) {
+        if (current_y as i16 >= input_box.start.y - 5) && ((current_y as i16) < (input_box.start.y + input_box.length_y as i16) + 5) {
             return true;
         }
     }
@@ -165,6 +167,15 @@ pub fn print_box(input_box: &Box, lcd: &mut stm32f7::lcd::Lcd) {
         }
     }
 }
+
+pub fn remove_box(input_box: &Box, lcd: &mut stm32f7::lcd::Lcd) {
+    for x in input_box.start.x..(input_box.start.x + input_box.length_x as i16) {
+        for y in input_box.start.y..(input_box.start.y + input_box.length_y as i16) {
+            lcd.print_point_color_at(limit(x, X_DIM_RES) as u16, limit(y, Y_DIM_RES) as u16, BACKGROUND_COLOR);
+        }
+    }
+}
+
 
 ////
 //HELPER METHODS
