@@ -175,7 +175,7 @@ fn main (hw: board::Hardware) -> ! {
 
         //POLL FOR NEW AUDIO DATA //FILTERING
         let mut i = 0;
-        let mut test: bool = false;
+        let mut test = false;
         while i < filter::AUDIO_BUF_LENGTH {
             //Write data from mics in data_raw puffer
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
@@ -183,26 +183,12 @@ fn main (hw: board::Hardware) -> ! {
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
             audio_buf.data_raw[i].1 = (sai_2.bdr.read().data() as i16) as i32;
 
-            //DEBUGGING  
-            let foo1 = sai_2.bdr.read().data() as i16;
-            let foo2 = sai_2.bdr.read().data() as i16;
-            if (foo1 as i32) < min {
-                min = foo1 as i32;
-            }
-            if (foo2 as i32) < min {
-                min = foo2 as i32;
-            }
-            if (foo1 as i32) > max {
-                max = foo1 as i32;
-            }
-            if (foo2 as i32) > max {
-                max = foo2 as i32;
-            }
-            //DEBUGGING
+            
 
 
             //Only filter relevant data above a threshold
-            if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || test {
+            if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold
+                     || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || test {
                 test = true;
                 filter::fir_filter(&mut audio_buf, i);
                 if waves_mode_activated { //interface to display
