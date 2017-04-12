@@ -129,8 +129,7 @@ fn main (hw: board::Hardware) -> ! {
     sai_2.acr1.write(acr1);
     sai_2.bcr1.write(bcr1);
     //Thereshold for relevant data
-    //let threshold = 2048;
-    let threshold = -65000;
+    let threshold = 8000;
 
     //GUI stuff
     let aud_main_vec_anchor = gui::init_point((gui::X_DIM_RES/2) as i16, (gui::Y_DIM_RES/2) as i16);
@@ -164,20 +163,6 @@ fn main (hw: board::Hardware) -> ! {
     //DEBUGGING
 
     loop{
-        //DEBUGGING
-        let ticks_new = system_clock::ticks();
-
-        if (ticks_new > ticks + 1000) {
-            ticks = ticks_new;
-            prev_loop_count = loop_count;
-            loop_count = 0;
-
-        }
-
-        loop_count += 1;
-        //DEBUGGING
-
-
         //POLL FOR NEW AUDIO DATA //FILTERING
         let mut i = 0;
         let mut active: bool = false;
@@ -187,24 +172,6 @@ fn main (hw: board::Hardware) -> ! {
             audio_buf.data_raw[i].0 = (sai_2.bdr.read().data() as i16) as i32;
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
             audio_buf.data_raw[i].1 = (sai_2.bdr.read().data() as i16) as i32;
-
-            //DEBUGGING  
-            let foo1 = sai_2.bdr.read().data() as i16;
-            let foo2 = sai_2.bdr.read().data() as i16;
-            if (foo1 as i32) < min {
-                min = foo1 as i32;
-            }
-            if (foo2 as i32) < min {
-                min = foo2 as i32;
-            }
-            if (foo1 as i32) > max {
-                max = foo1 as i32;
-            }
-            if (foo2 as i32) > max {
-                max = foo2 as i32;
-            }
-            //DEBUGGING
-
 
             //Only filter relevant data above a threshold
             if audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].1 >= threshold || active {
@@ -220,7 +187,7 @@ fn main (hw: board::Hardware) -> ! {
 
         
         //COMPUTE SINE OF COLLECTED AUDIO DATA FOR DISPLAYING
-        sinus_alpha = sonar_localization::get_sound_source_direction_sin(&data_used);
+        sinus_alpha = sonar_localization::get_sound_source_direction_sin(&audio_buf.data_filter);
         
         //GUI ENVIRO SETUPS AND UPDATES
         gui::print_box(&view_mode_toggle_box, &mut lcd);
