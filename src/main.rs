@@ -157,14 +157,14 @@ fn main (hw: board::Hardware) -> ! {
 
 
     //DEBUGGING
-    let mut test = false;
+    let mut active = false;
 
 
     loop{
 
         //POLL FOR NEW AUDIO DATA //FILTERING
         let mut i = 0;
-        test = false;
+        active = false;
         while i < filter::AUDIO_BUF_LENGTH + filter::FILTER_OFFSET {
 
             //Write data from mics in data_raw puffer
@@ -173,10 +173,10 @@ fn main (hw: board::Hardware) -> ! {
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
             audio_buf.data_raw[i].1 = (sai_2.bdr.read().data() as i16) as i32;
             //Only filter relevant data above a threshold
-            if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || test {
-                test = true;
+            if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || active {
+                active = true;
 
-                assert!(test == true);
+                assert!(active == true);
 
                 if (i >= filter::FILTER_OFFSET) {
                      filter::fir_filter(&mut audio_buf, i);
