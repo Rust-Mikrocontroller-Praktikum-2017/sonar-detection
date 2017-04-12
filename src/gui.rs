@@ -25,7 +25,7 @@ pub struct Box {
 pub const BACKGROUND_COLOR: u16 = 0x11ac;
 pub const FIRST_COLOR: u16 = 0xffff;
 pub const SECOND_COLOR: u16 = 0xfae0;
-pub const THIRD_COLOR: u16 = 0x6fe0;
+pub const THIRD_COLOR: u16 = 0x07e0;
 pub const X_DIM_RES: u16 = 480;
 pub const Y_DIM_RES: u16 = 272;
 //pub const SMOOTH_MULTIPLIER: u16 = 20; //not in use
@@ -74,7 +74,7 @@ fn sqrt(a: i16) -> i16 {
     }
     let big_a: u64 = (a as u64) << 10;
     let mut current_root_approx: u64 = (big_a as u64 + (1 << 10)) >> 1;
-    for _ in 0..4 {
+    for _ in 0..10 {
         current_root_approx = (current_root_approx + ((big_a / current_root_approx) << 10)) >> 1;
     }
     current_root_approx >>= 9;
