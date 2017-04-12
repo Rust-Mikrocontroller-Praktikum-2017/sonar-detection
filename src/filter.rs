@@ -28,8 +28,8 @@ pub fn fir_filter(audio_buf: &mut AudioBuffer, index: usize) {
         sum_right = sum_right + audio_buf.data_raw[((index + AUDIO_BUF_LENGTH - j) % AUDIO_BUF_LENGTH) as usize ].0 as i32;
         sum_left =  sum_left + audio_buf.data_raw[((index + AUDIO_BUF_LENGTH - j) % AUDIO_BUF_LENGTH) as usize ].1 as i32;
     }
-    sum_right = sum_right / 1000;
-    sum_left = sum_left / 1000;
+    sum_right = sum_right;
+    sum_left = sum_left;
     audio_buf.data_filter[index] = ( (sum_right as i32), (sum_left as i32));
 
     

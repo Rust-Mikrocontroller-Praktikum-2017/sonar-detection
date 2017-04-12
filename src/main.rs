@@ -11,7 +11,7 @@ extern crate stm32f7_discovery as stm32f7;
 // initialization routines for .data and .bss
 extern crate r0;
 //extern crate std::f32;
-use stm32f7::{system_clock, sdram, lcd, i2c,audio, touch, board, embedded};
+use stm32f7::{system_clock, sdram, lcd, i2c, audio, touch, board, embedded};
 
 #[no_mangle]
 pub unsafe extern "C" fn reset() -> ! {
@@ -91,6 +91,10 @@ fn main (hw: board::Hardware) -> ! {
         r.set_gpiojen(true);
         r.set_gpioken(true);
     });
+
+    //sdram
+    sdram::init(rcc,fmc,&mut gpio);
+    
     //i2c
     i2c::init_pins_and_clocks(rcc,&mut gpio);
     let mut i2c_3 = i2c::init(i2c_3);
@@ -103,7 +107,7 @@ fn main (hw: board::Hardware) -> ! {
     //Init lcd controller,touch and sram
     let mut lcd = lcd::init(ltdc, rcc, &mut gpio);
     touch::check_family_id(&mut i2c_3).unwrap();
-    sdram::init(rcc,fmc,&mut gpio);
+    
     lcd.clear_screen();
     lcd.set_background_color(lcd::Color::from_hex(gui::BACKGROUND_COLOR as u32));
     
@@ -120,12 +124,13 @@ fn main (hw: board::Hardware) -> ! {
     //Set clock divider
     let mut acr1 = sai_2.acr1.read();
     let mut bcr1 = sai_2.bcr1.read();
-    acr1.set_mcjdiv(6 as u8);
-    bcr1.set_mcjdiv(6 as u8);
+    acr1.set_mcjdiv(2 as u8);
+    bcr1.set_mcjdiv(2 as u8);
     sai_2.acr1.write(acr1);
     sai_2.bcr1.write(bcr1);
     //Thereshold for relevant data
-    let threshold = 2048;
+    //let threshold = 2048;
+    let threshold = -65000;
 
     //GUI stuff
     let aud_main_vec_anchor = gui::init_point((gui::X_DIM_RES/2) as i16, (gui::Y_DIM_RES/2) as i16);
@@ -137,28 +142,85 @@ fn main (hw: board::Hardware) -> ! {
     //let mut smooth_strength: u16 = 1; //currently not in use
     let mut sinus_alpha; //angle for vector mode
 
+    //ONLY FOR DEGUBBING
+    let mut max: i32 = 0;
+    let mut min: i32 = 0;
+
+    let mut loop_count: u64 = 0;
+    let mut prev_loop_count = loop_count;
+    let mut ticks = system_clock::ticks();
+    
+
+    let data1 = [-921809,-999984,-926073,-711317,-388378,-6371,376606,702304,921191,999974,926673,712436,389845,7963,-375130,-701170,-920570,-999962,-927271,-713553,-391311,-9556,373653,700033,919947,999946,927866,714667,392776,11148,-372175,-698895];
+    let data2 = [-933525,-999667,-913770,-688900,-359256,25027,405503,724307,932953,999706,914416,690054,360742,-23435,-404047,-723208,-932378,-999744,-915060,-691206,-362227,21842,402590,722108,931801,999779,915701,692356,363711,-20250,-401131,-721005];
+
+    let mut data_used:[(i32, i32); filter::AUDIO_BUF_LENGTH] = [(0,0); filter::AUDIO_BUF_LENGTH];
+
+    for i in 0..32 {
+        data_used[i] = (data1[i], data2[i]);
+    }
+
+
+    //DEBUGGING
+
     loop{
+        //DEBUGGING
+        let ticks_new = system_clock::ticks();
+
+        if (ticks_new > ticks + 1000) {
+            ticks = ticks_new;
+            prev_loop_count = loop_count;
+            loop_count = 0;
+
+        }
+
+        loop_count += 1;
+        //DEBUGGING
+
+
         //POLL FOR NEW AUDIO DATA //FILTERING
         let mut i = 0;
+        let mut active: bool = false;
         while i < filter::AUDIO_BUF_LENGTH {
             //Write data from mics in data_raw puffer
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
-            audio_buf.data_raw[i].0 = sai_2.bdr.read().data() as i32;
+            audio_buf.data_raw[i].0 = (sai_2.bdr.read().data() as i16) as i32;
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
-            audio_buf.data_raw[i].1 = sai_2.bdr.read().data() as i32;  
+            audio_buf.data_raw[i].1 = (sai_2.bdr.read().data() as i16) as i32;
+
+            //DEBUGGING  
+            let foo1 = sai_2.bdr.read().data() as i16;
+            let foo2 = sai_2.bdr.read().data() as i16;
+            if (foo1 as i32) < min {
+                min = foo1 as i32;
+            }
+            if (foo2 as i32) < min {
+                min = foo2 as i32;
+            }
+            if (foo1 as i32) > max {
+                max = foo1 as i32;
+            }
+            if (foo2 as i32) > max {
+                max = foo2 as i32;
+            }
+            //DEBUGGING
+
 
             //Only filter relevant data above a threshold
-            if audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].1 >= threshold {
+            if audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].1 >= threshold || active {
+                active = true;
                 filter::fir_filter(&mut audio_buf, i);
-                if waves_mode_activated { //interface to display
-                    lcd.set_next_col( (audio_buf.data_filter[i].0) as u32 , (audio_buf.data_filter[i].1) as u32 );
-                }
+                //if waves_mode_activated { //interface to display
+                //    lcd.set_next_col((((audio_buf.data_filter[i].0) + 0x8000) / 1000) as u32, (((audio_buf.data_filter[i].1) + 0x8000) / 1000) as u32);
+                //}
                 i += 1;
             }
         }
 
+
+        
         //COMPUTE SINE OF COLLECTED AUDIO DATA FOR DISPLAYING
-        sinus_alpha = sonar_localization::get_sound_source_direction_sin(&audio_buf.data_filter);
+        sinus_alpha = sonar_localization::get_sound_source_direction_sin(&data_used);
         
         //GUI ENVIRO SETUPS AND UPDATES
         gui::print_box(&view_mode_toggle_box, &mut lcd);
