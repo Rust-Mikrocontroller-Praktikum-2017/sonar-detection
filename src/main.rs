@@ -7,7 +7,6 @@
 mod filter;
 mod gui;
 mod sonar_localization;
-use sonar_localization as detection;
 
 extern crate stm32f7_discovery as stm32f7;
 // initialization routines for .data and .bss
@@ -113,13 +112,6 @@ fn main (hw: board::Hardware) -> ! {
     
     lcd.clear_screen();
     lcd.set_background_color(lcd::Color::from_hex(gui::BACKGROUND_COLOR as u32));
-    
-    //let mut lcd = lcd::init(ltdc, rcc, &mut gpio);
-    //let mut layer1 = lcd.layer_1().unwrap();
-    //let mut layer2 = lcd.layer_2().unwrap();
-    //layer1.clear();
-    //layer2.clear();
-    //stm32f7::init_stdout(layer2);
 
     //Audio buffer
     let mut audio_buf = filter::init_audio_buffer();
@@ -175,11 +167,8 @@ fn main (hw: board::Hardware) -> ! {
             }
         }
 
-
-
-            //COMPUTE SINE OF COLLECTED AUDIO DATA FOR DISPLAYING
-            sinus_alpha = detection::get_sound_source_direction_sin(&audio_buf.data_filter);
-
+        //COMPUTE SINE OF COLLECTED AUDIO DATA FOR DISPLAYING
+        sinus_alpha = sonar_localization::get_sound_source_direction_sin(&audio_buf.data_filter);
         
         //GUI ENVIRO SETUPS AND UPDATES
         gui::print_box(&view_mode_toggle_box, &mut lcd);
@@ -207,7 +196,6 @@ fn main (hw: board::Hardware) -> ! {
             }
         }
 
-
         //DISPLAY COMPUTED AUDIO DATA
         if !waves_mode_activated { //displaying for vector mode
             //remove old vector
@@ -218,8 +206,7 @@ fn main (hw: board::Hardware) -> ! {
                   audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, sinus_alpha));
             }    
             //print updated vector
-            gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);
-            
+            gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);            
         } else {} //NOTE: Displaying for waves mode is implemented directly at audio data poll section  
     }  
 }
