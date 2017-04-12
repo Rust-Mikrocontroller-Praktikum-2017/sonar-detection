@@ -133,9 +133,9 @@ fn main (hw: board::Hardware) -> ! {
     let view_mode_toggle_box = gui::init_box(gui::init_point(20, 212), 50, 50, gui::THIRD_COLOR);
     let mut waves_mode_activated: bool = false;
     let mut smoothing_data_counter = 0;
-    let mut smoothing_data_sumup = 0;
-    let mut smoothing_data_avg = 0;
-    let mut smoothing_data_strength = 1;
+    let mut smoothing_data_sumup: f32 = 0.0;
+    let mut smoothing_data_avg: f32;
+    let mut smoothing_data_strength = 32;
     //angle for vector mode
     let mut sinus_alpha: f32;
     //specifies if sampled audio values are valid
@@ -206,7 +206,7 @@ fn main (hw: board::Hardware) -> ! {
                 smoothing_data_sumup += sinus_alpha;
                 smoothing_data_counter += 1;
                 if smoothing_data_counter == smoothing_data_strength {
-                    smoothing_data_avg = smoothing_data_sumup / smoothing_data_strength;
+                    smoothing_data_avg = smoothing_data_sumup / smoothing_data_strength as f32;
                     smoothing_data_sumup = smoothing_data_avg;
                     smoothing_data_counter = 0;
                     audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, smoothing_data_avg));
