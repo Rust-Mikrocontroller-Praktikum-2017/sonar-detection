@@ -132,8 +132,12 @@ fn main (hw: board::Hardware) -> ! {
     let smoothing_box =  gui::init_box(gui::init_point(20, 10), 20, 200, gui::SECOND_COLOR);
     let view_mode_toggle_box = gui::init_box(gui::init_point(20, 212), 50, 50, gui::THIRD_COLOR);
     let mut waves_mode_activated: bool = false;
-    //let mut smooth_strength: u16 = 1; //currently not in use
-    let mut sinus_alpha: f32 = 0.0; //angle for vector mode
+    let mut smoothing_data_counter = 0;
+    let mut smoothing_data_sumup = 0;
+    let mut smoothing_data_avg = 0;
+    let mut smoothing_data_strength = 1;
+    //angle for vector mode
+    let mut sinus_alpha: f32;
     //specifies if sampled audio values are valid
     let mut active = false;
 
@@ -199,7 +203,15 @@ fn main (hw: board::Hardware) -> ! {
             gui::remove_vector(&mut audio_main_vec, &mut lcd);
             //calculate updated vector
             if sinus_alpha < 1.0 && sinus_alpha > -1.0 && sinus_alpha != 0.0 {
-                  audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, sinus_alpha));
+                smoothing_data_sumup += sinus_alpha;
+                smoothing_data_counter += 1;
+                if smoothing_data_counter == smoothing_data_strength {
+                    smoothing_data_avg = smoothing_data_sumup / smoothing_data_strength;
+                    smoothing_data_sumup = smoothing_data_avg;
+                    smoothing_data_counter = 0;
+                    audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, smoothing_data_avg));
+                }
+                
             }    
             //print updated vector
             gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);            
