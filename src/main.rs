@@ -151,14 +151,14 @@ fn main (hw: board::Hardware) -> ! {
     let mut ticks = system_clock::ticks();
     
 
-    let data1 = [-921809,-999984,-926073,-711317,-388378,-6371,376606,702304,921191,999974,926673,712436,389845,7963,-375130,-701170,-920570,-999962,-927271,-713553,-391311,-9556,373653,700033,919947,999946,927866,714667,392776,11148,-372175,-698895];
-    let data2 = [-933525,-999667,-913770,-688900,-359256,25027,405503,724307,932953,999706,914416,690054,360742,-23435,-404047,-723208,-932378,-999744,-915060,-691206,-362227,21842,402590,722108,931801,999779,915701,692356,363711,-20250,-401131,-721005];
+    //let data1 = [-921809,-999984,-926073,-711317,-388378,-6371,376606,702304,921191,999974,926673,712436,389845,7963,-375130,-701170,-920570,-999962,-927271,-713553,-391311,-9556,373653,700033,919947,999946,927866,714667,392776,11148,-372175,-698895];
+    //let data2 = [-933525,-999667,-913770,-688900,-359256,25027,405503,724307,932953,999706,914416,690054,360742,-23435,-404047,-723208,-932378,-999744,-915060,-691206,-362227,21842,402590,722108,931801,999779,915701,692356,363711,-20250,-401131,-721005];
 
-    let mut data_used:[(i32, i32); filter::AUDIO_BUF_LENGTH] = [(0,0); filter::AUDIO_BUF_LENGTH];
+    //let mut data_used:[(i32, i32); filter::AUDIO_BUF_LENGTH] = [(0,0); filter::AUDIO_BUF_LENGTH];
 
-    for i in 0..32 {
-        data_used[i] = (data1[i], data2[i]);
-    }
+    //for i in 0..32 {
+    //    data_used[i] = (data1[i], data2[i]);
+    //}
 
 
     //DEBUGGING
@@ -207,20 +207,20 @@ fn main (hw: board::Hardware) -> ! {
 
 
             //Only filter relevant data above a threshold
-            if audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].1 >= threshold || active {
-                active = true;
+            //if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].1 >= threshold)  || active {
+            //    active = true;
                 filter::fir_filter(&mut audio_buf, i);
                 //if waves_mode_activated { //interface to display
                 //    lcd.set_next_col((((audio_buf.data_filter[i].0) + 0x8000) / 1000) as u32, (((audio_buf.data_filter[i].1) + 0x8000) / 1000) as u32);
                 //}
                 i += 1;
-            }
+            //}
         }
 
 
         
         //COMPUTE SINE OF COLLECTED AUDIO DATA FOR DISPLAYING
-        sinus_alpha = sonar_localization::get_sound_source_direction_sin(&data_used);
+        sinus_alpha = sonar_localization::get_sound_source_direction_sin(&audio_buf.data_filter);
         
         //GUI ENVIRO SETUPS AND UPDATES
         gui::print_box(&view_mode_toggle_box, &mut lcd);
@@ -254,6 +254,8 @@ fn main (hw: board::Hardware) -> ! {
             //remove old vector
             gui::remove_vector(&mut audio_main_vec, &mut lcd);
             //calculate updated vector
+            assert!(sinus_alpha <= 1.0);
+            assert!(sinus_alpha >= -1.0);
             audio_main_vec = *(gui::calculate_vector(&mut audio_main_vec, sinus_alpha));
             //print updated vector
             gui::print_vector(&mut audio_main_vec, aud_main_vec_anchor.x, aud_main_vec_anchor.y, &mut lcd, gui::FIRST_COLOR);
