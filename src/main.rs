@@ -143,19 +143,9 @@ fn main (hw: board::Hardware) -> ! {
     let view_mode_toggle_box = gui::init_box(gui::init_point(20, 217), 50, 50, gui::THIRD_COLOR);
     let mut waves_mode_activated: bool = true;
     //let mut smooth_strength: u16 = 1; //currently not in use
-    let mut sinus_alpha:f32 = -10.0; //angle for vector mode
+    let mut sinus_alpha:f32 = 0.3; //angle for vector mode
 
-    //threshold counter
-    let mut threshold_counter: u32 = 0;
 
-    //ONLY FOR DEGUBBING
-    let mut max: i32 = 0;
-    let mut min: i32 = 0;
-
-    let mut loop_count: u64 = 0;
-    let mut prev_loop_count = loop_count;
-    let mut ticks = system_clock::ticks();
-    let mut last_tick = ticks;
     
 
     //let data1 = [-921809,-999984,-926073,-711317,-388378,-6371,376606,702304,921191,999974,926673,712436,389845,7963,-375130,-701170,-920570,-999962,-927271,-713553,-391311,-9556,373653,700033,919947,999946,927866,714667,392776,11148,-372175,-698895];
@@ -169,13 +159,15 @@ fn main (hw: board::Hardware) -> ! {
 
 
     //DEBUGGING
+    let mut test = false;
+
 
     loop{
 
 
         //POLL FOR NEW AUDIO DATA //FILTERING
         let mut i = 0;
-        let mut test = false;
+        test = false;
         while i < filter::AUDIO_BUF_LENGTH {
             //Write data from mics in data_raw puffer
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
@@ -187,21 +179,22 @@ fn main (hw: board::Hardware) -> ! {
 
 
             //Only filter relevant data above a threshold
-            if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold
-                     || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || test {
+            if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || test {
                 test = true;
+                assert!(test == true);
                 filter::fir_filter(&mut audio_buf, i);
                 if waves_mode_activated { //interface to display
-                    lcd.set_next_col((((audio_buf.data_filter[i].0))) as u32, (((audio_buf.data_filter[i].1))) as u32);
+                    lcd.set_next_col((((audio_buf.data_filter[i].0))) as u16 as u32, (((audio_buf.data_filter[i].1))) as u16 as u32);
                 }
                 i += 1;
             }
         }
 
 
-        if test {
+        if test == true {
             //COMPUTE SINE OF COLLECTED AUDIO DATA FOR DISPLAYING
-            sinus_alpha = detection::get_sound_source_direction_sin(&audio_buf.data_filter);
+            sinus_alpha = 0.7;
+            //sinus_alpha = detection::get_sound_source_direction_sin(&audio_buf.data_filter);
         }
         
         //GUI ENVIRO SETUPS AND UPDATES
