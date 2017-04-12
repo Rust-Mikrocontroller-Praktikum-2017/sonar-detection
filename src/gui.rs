@@ -22,13 +22,14 @@ pub struct Box {
 
 ////
 //CONSTANTS
-pub const BACKGROUND_COLOR: u16 = 0x0;
+pub const BACKGROUND_COLOR: u16 = 0x11ac;
 pub const FIRST_COLOR: u16 = 0xffff;
-pub const SECOND_COLOR: u16 = 0xf228;
-pub const THIRD_COLOR: u16 = 0xd681;
+pub const SECOND_COLOR: u16 = 0xfae0;
+pub const THIRD_COLOR: u16 = 0x6fe0;
 pub const X_DIM_RES: u16 = 480;
 pub const Y_DIM_RES: u16 = 272;
 //pub const SMOOTH_MULTIPLIER: u16 = 20; //not in use
+pub const TOGGLE_COOLDOWN: usize = 1500;
 
 ////
 //INITIALIZERS
