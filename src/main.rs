@@ -173,7 +173,7 @@ fn main (hw: board::Hardware) -> ! {
         //POLL FOR NEW AUDIO DATA //FILTERING
         let mut i = 0;
         let mut test = false;
-        while i < filter::AUDIO_BUF_LENGTH {
+        while i < filter::AUDIO_BUF_LENGTH + filter::FILTER_OFFSET {
             //Write data from mics in data_raw puffer
             while !sai_2.bsr.read().freq() {} // fifo_request_flag
             audio_buf.data_raw[i].0 = (sai_2.bdr.read().data() as i16) as i32;
@@ -183,7 +183,9 @@ fn main (hw: board::Hardware) -> ! {
             if (audio_buf.data_raw[i].0 >= threshold || audio_buf.data_raw[i].0 <= ((-1) * threshold) || audio_buf.data_raw[i].1 >= threshold
                      || audio_buf.data_raw[i].1 <= ((-1) * threshold)) || test {
                 test = true;
-                filter::fir_filter(&mut audio_buf, i);
+                if (i >= filter::FILTER_OFFSET) {
+                     filter::fir_filter(&mut audio_buf, i);
+                }
                 if waves_mode_activated { //interface to display
                     lcd.set_next_col((((audio_buf.data_filter[i].0))) as u32, (((audio_buf.data_filter[i].1))) as u32);
                 }
