@@ -51,14 +51,6 @@ version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "compiler-builtins-snapshot"
-version = "0.0.20161008+c56faf22abb39724008148d58f12bcd43b6d236b"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-dependencies = [
- "rlibc 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "cortex-m"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -69,12 +61,11 @@ dependencies = [
 [[package]]
 name = "embedded"
 version = "0.3.0"
-source = "git+https://github.com/embed-rs/embedded-rs.git#c7f47a6ca17b60bae395d5532fd55c1ddc2132c4"
+source = "git+https://github.com/embed-rs/embedded-rs.git#71909fc533f777afd440338c5f9dfa057f882712"
 dependencies = [
  "arrayvec 0.3.22 (registry+https://github.com/rust-lang/crates.io-index)",
  "bit_field 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "bitflags 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "compiler-builtins-snapshot 0.0.20161008+c56faf22abb39724008148d58f12bcd43b6d236b (registry+https://github.com/rust-lang/crates.io-index)",
  "volatile 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -138,14 +129,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "stm32f7_discovery"
 version = "0.1.0"
-source = "git+https://github.com/embed-rs/stm32f7-discovery.git#7208c55c5ff7c9850b38bf1db32330a6c3ac96bd"
+source = "git+https://github.com/embed-rs/stm32f7-discovery.git#e4c00f8536d7c6b167c9cf5574d0fe8e1e0cfcff"
 dependencies = [
  "alloc-cortex-m 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "arrayvec 0.3.22 (registry+https://github.com/rust-lang/crates.io-index)",
  "bit_field 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "byteorder 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "cortex-m 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "embedded 0.3.0 (git+https://github.com/embed-rs/embedded-rs.git)",
  "embedded_stm32f7 0.1.0 (git+https://github.com/embed-rs/embedded_stm32f7.git)",
  "net 0.1.0 (git+https://github.com/embed-rs/net.git)",
  "r0 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -172,7 +162,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum bit_field 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ff91a64014e1bc53bf643920f2c9ab5f0980d92a0948295f3ee550e9266849ad"
 "checksum bitflags 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "aad18937a628ec6abcd26d1489012cc0e18c21798210f491af69ded9b881106d"
 "checksum byteorder 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c40977b0ee6b9885c9013cd41d9feffdd22deb3bb4dc3a71d901cc7a77de18c8"
-"checksum compiler-builtins-snapshot 0.0.20161008+c56faf22abb39724008148d58f12bcd43b6d236b (registry+https://github.com/rust-lang/crates.io-index)" = "ca81a7af7dcd70e798e34f9928e22c35204059493ffe3cda46a2f0c797209cf6"
 "checksum cortex-m 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "f636846f87391b548e55be42a3f787c76348288f8716486a7e184004b745c62d"
 "checksum embedded 0.3.0 (git+https://github.com/embed-rs/embedded-rs.git)" = "<none>"
 "checksum embedded_stm32f7 0.1.0 (git+https://github.com/embed-rs/embedded_stm32f7.git)" = "<none>"

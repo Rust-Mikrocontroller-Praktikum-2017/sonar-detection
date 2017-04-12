@@ -22,13 +22,14 @@ pub struct Box {
 
 ////
 //CONSTANTS
-pub const BACKGROUND_COLOR: u16 = 0x0;
+pub const BACKGROUND_COLOR: u16 = 0x11ac;
 pub const FIRST_COLOR: u16 = 0xffff;
-pub const SECOND_COLOR: u16 = 0xf228;
-pub const THIRD_COLOR: u16 = 0xd681;
+pub const SECOND_COLOR: u16 = 0xfae0;
+pub const THIRD_COLOR: u16 = 0x6fe0;
 pub const X_DIM_RES: u16 = 480;
 pub const Y_DIM_RES: u16 = 272;
 //pub const SMOOTH_MULTIPLIER: u16 = 20; //not in use
+pub const TOGGLE_COOLDOWN: usize = 1500;
 
 ////
 //INITIALIZERS
@@ -48,11 +49,10 @@ pub fn init_box(new_start: Point, new_length_x: u16, new_length_y: u16, new_colo
 //calculating vector just by assuming a fixed angle and a fixed length
 pub fn calculate_vector(input_vector: &mut Vector, sinus: f32) -> &mut Vector {
     //compute intensioned length of vector (root[x^2 + y^2])
-    let length = (Y_DIM_RES/2) - 10; //just hardcoded
+    let length: i16 = (Y_DIM_RES as i16 / 2) - 10; //just hardcoded
     //compute deltas
     input_vector.delta_y = (sinus * length as f32) as i16;
-    let raw_delta_x = sqrt(length.pow(2) as i16 - input_vector.delta_y.pow(2));
-    input_vector.delta_x = raw_delta_x as i16;
+    input_vector.delta_x = sqrt(length.pow(2) - input_vector.delta_y.pow(2));
     return input_vector;
 }
 
@@ -67,7 +67,7 @@ pub fn is_in_box(current_x: u16, current_y: u16, input_box: &Box) -> bool {
     return false;
 }
 
-fn sqrt(a: i16) -> i16 {
+pub fn sqrt(a: i16) -> i16 {
     if a <= 0 {
         return 0;
     }

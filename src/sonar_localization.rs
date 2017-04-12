@@ -60,6 +60,7 @@ use filter;
 //}
 
 pub fn get_sound_source_direction_sin(data: &[(i32, i32)]) -> f32 {
+    return -8.0;
     let mut data1: [i32; filter::AUDIO_BUF_LENGTH] = [0; filter::AUDIO_BUF_LENGTH];
     let mut data2: [i32; filter::AUDIO_BUF_LENGTH] = [0; filter::AUDIO_BUF_LENGTH];
     for i in 0..filter::AUDIO_BUF_LENGTH {
@@ -74,12 +75,14 @@ pub fn get_sound_source_direction_sin(data: &[(i32, i32)]) -> f32 {
     let dt = get_time_difference(&data1, &data2);
     //println!("{}",dt);
     if dt == 0.0 {
-        return 0.0;
+        return -8.0;
     }
     //ds = delta strecke, Abstandsunterschied der Signalquelle zu den beiden Mikrofonen
     let ds = velocity*dt;
     //gibt den sinus des Winkels zur Signalquelle zurück
-    (ds / distance) as f32
+    //(ds / distance) as f32
+
+    -8.0
 }
 
 fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
@@ -96,23 +99,31 @@ fn get_time_difference(data1: &[i32], data2: &[i32]) -> f32 {
     //println!("{}",t1);
     //println!("{}",t2);
     if t1 * 1.05 < t2 || t1 * 0.95 > t2 {
-        return 0.0;
+        return -5.0;
     }
     let t = (t1 + t2) / 2.0;
+    if (t < 0.0002) {
+        return -2.0;
+    }
     // ds1 = Laufzeitunterschied der beiden Signale an der ersten Nullstelle
     let dt1 = zero2_1 - zero1_1;
     // ds2 = Laufzeitunterschied der beiden Signale an der zweiten Nullstelle
     let dt2 = zero2_2 - zero1_2;
     //if (ds1 < ds2 * 1.05 && ds1 > ds2 * 0.95) {
     let dt_temp = (dt1 + dt2) / 2.0;
-    let dt: f32;
+    let mut dt: f32 = 0.0;
     //println!("{}",dt1);
     //println!("{}",dt2);
     //println!("{}",dt_temp);
     if dt_temp > (0.5 * t) {
         dt = t - dt_temp;
+        return -6.0;
     } else {
         dt = dt_temp;
+        return -7.0;
+    }
+    if dt == 0.0 {
+        return -8.0;
     }
     dt
 
