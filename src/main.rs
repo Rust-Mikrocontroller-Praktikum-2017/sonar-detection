@@ -136,7 +136,7 @@ fn main (hw: board::Hardware) -> ! {
     let mut smoothing_data_counter: i16 = 0;
     let mut smoothing_data_sumup: f32 = 0.0;
     let mut smoothing_data_avg: f32;
-    let mut smoothing_data_strength = gui::SMOOTHING_STRENGTH_LOW;
+    let mut smoothing_data_strength = gui::SMOOTHING_STRENGTH_HIGH;
     
     //NOT NEEDED, but ready to be implemented ;)
     
